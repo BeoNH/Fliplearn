@@ -1,0 +1,195 @@
+---
+description: Architecture, Manager pattern, folder structure — áp dụng khi tạo hoặc sửa managers/components
+globs: managers/**.ts, components/**.ts, scripts/**.ts
+alwaysApply: false
+---
+
+# Architecture & Managers
+
+## Folder Structure
+
+```
+assets/
+├── scripts/
+│   ├── managers/
+│   │   ├── GameManager.ts       ← singleton, điều phối toàn bộ game flow
+│   │   ├── UIManager.ts         ← quản lý panel/screen
+│   │   ├── NetworkManager.ts    ← gọi API, xử lý response
+│   │   ├── ScoreManager.ts      ← tính điểm, lưu best score
+│   │   ├── CardManager.ts       ← logic thẻ, matching, flip
+│   │   ├── ResourceManager.ts   ← load prefab/asset
+│   │   └── TimerManager.ts      ← đếm thời gian nếu có giới hạn
+│   ├── components/
+│   │   ├── CardView.ts          ← UI thẻ (chỉ render + emit event)
+│   │   ├── GameHUD.ts           ← hiển thị timer, score in-game
+│   │   ├── ResultPanel.ts       ← màn hình kết quả
+│   │   ├── TopicListPanel.ts    ← danh sách chủ đề
+│   │   └── LeaderboardPanel.ts  ← bảng xếp hạng
+│   ├── data/
+│   │   ├── GameEvents.ts        ← tất cả event name constants
+│   │   ├── GameConstants.ts     ← magic numbers / config defaults
+│   │   └── GameTypes.ts         ← interfaces, enums dùng chung
+│   └── utils/
+│       └── Logger.ts            ← wrapper log (không dùng console.log)
+├── prefabs/
+│   ├── CardPrefab.prefab
+│   ├── ResultPanel.prefab
+│   └── TopicItem.prefab
+└── resources/              ← asset load động qua ResourceManager
+```
+
+---
+
+## Singleton Manager Pattern
+
+```typescript
+// Template chuẩn cho mọi Manager
+export class GameManager {
+  private static instance: GameManager | null = null;
+
+  static get instance(): GameManager {
+    if (!GameManager.instance) {
+      GameManager.instance = new GameManager();
+    }
+    return GameManager.instance;
+  }
+
+  private constructor() {}   // private constructor — không new trực tiếp
+
+  // ─── Public API ────────────────────────────────────────────
+  startSession(config: IGameConfig): void { /* ... */ }
+  endSession(): void { /* ... */ }
+
+  // ─── Private helpers ────────────────────────────────────────
+  private _initLevel(level: number): void { /* ... */ }
+}
+```
+
+---
+
+## Event System (BroadcastReceiver)
+
+### Emit event
+```typescript
+import { ON_CARD_MATCHED } from '../data/GameEvents';
+
+// Emit bằng cc.director
+cc.director.emit(ON_CARD_MATCHED, { cardId, pairId });
+```
+
+### Listen event
+```typescript
+import { ON_CARD_MATCHED } from '../data/GameEvents';
+
+// Trong onLoad() hoặc start()
+cc.director.on(ON_CARD_MATCHED, this._onCardMatched, this);
+
+// Trong onDestroy() — luôn remove để tránh memory leak
+cc.director.off(ON_CARD_MATCHED, this._onCardMatched, this);
+
+private _onCardMatched(data: { cardId: string; pairId: string }): void {
+  // xử lý
+}
+```
+
+> **Luôn** remove listener trong `onDestroy()` để tránh memory leak.
+
+---
+
+## UIManager – Quản lý màn hình
+
+```typescript
+enum ScreenName {
+  GAME_INFO     = 'GameInfoScreen',
+  TOPIC_INFO    = 'TopicInfoScreen',
+  GAME_PLAY     = 'GamePlayScreen',
+  RESULT        = 'ResultScreen',
+  LEADERBOARD   = 'LeaderboardScreen',
+}
+
+// Dùng UIManager để điều hướng, không tự show/hide node trong component
+UIManager.instance.showScreen(ScreenName.GAME_PLAY);
+UIManager.instance.hideScreen(ScreenName.GAME_INFO);
+```
+
+---
+
+## NetworkManager – Gọi API
+
+```typescript
+// Không gọi fetch/http trực tiếp trong UI hay GameManager
+// Mọi call phải đi qua NetworkManager
+
+interface ISaveScoreRequest {
+  score: number;
+  time: number;
+  topicId: string;
+}
+
+interface ISaveScoreResponse {
+  success: boolean;
+  newBestScore: boolean;
+}
+
+// NetworkManager.ts
+async saveScore(payload: ISaveScoreRequest): Promise<ISaveScoreResponse> {
+  // POST /api/saveScore
+}
+```
+
+---
+
+## CardManager – Logic thẻ
+
+### Trách nhiệm
+- Khởi tạo và xáo trộn bộ thẻ từ data
+- Theo dõi trạng thái từng thẻ (`CardState`)
+- Xử lý flip + match logic
+- Emit sự kiện tương ứng
+
+### Không được làm
+- Không trực tiếp thao tác `node` Cocos
+- Không gọi API
+- Không biết về UIManager
+
+```typescript
+// Tách hàm nếu > 30 dòng
+flipCard(cardId: string): void { /* ... */ }       // validate + setState
+checkMatch(cardA: string, cardB: string): void { /* ... */ }  // so sánh pairId
+private _handleMismatch(cardA: string, cardB: string): void { /* ... */ }
+private _handleMatch(cardA: string, cardB: string): void { /* ... */ }
+```
+
+---
+
+## ResourceManager – Load asset
+
+```typescript
+// Load prefab đúng cách
+ResourceManager.instance.loadPrefab('CardPrefab', (prefab: cc.Prefab) => {
+  const cardNode = cc.instantiate(prefab);
+  // ...
+});
+
+// ❌ Sai — không load trực tiếp trong component
+const prefab = await cc.resources.load('CardPrefab');
+```
+
+---
+
+## Logger
+
+```typescript
+// Logger.ts — wrapper đơn giản
+export class Logger {
+  static info(tag: string, ...args: unknown[]): void {
+    // chỉ log ở DEBUG build
+  }
+  static warn(tag: string, ...args: unknown[]): void { /* ... */ }
+  static error(tag: string, ...args: unknown[]): void { /* ... */ }
+}
+
+// Cách dùng
+Logger.info('[CardManager]', 'Card flipped', cardId);
+Logger.error('[NetworkManager]', 'saveScore failed', error);
+```

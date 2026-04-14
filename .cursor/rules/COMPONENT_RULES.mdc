@@ -1,0 +1,196 @@
+---
+description: Rules cho UI Component — CardView, panels, HUD — áp dụng khi viết component Cocos
+globs: components/**.ts
+alwaysApply: false
+---
+
+# UI Component Rules
+
+## Nguyên tắc Component
+
+| Được phép | Không được phép |
+|---|---|
+| Render UI theo state | Viết matching/scoring logic |
+| Emit event khi user tương tác | Gọi API trực tiếp |
+| Subscribe event từ managers | Truy cập manager để lấy data |
+| Cache node reference | Dùng `node.find()` trong `update()` |
+| Gọi UIManager để điều hướng | Tự show/hide screen khác |
+
+---
+
+## Template Component chuẩn
+
+```typescript
+import { _decorator, Component, Node, Button } from 'cc';
+import { CardState, ICardData } from '../data/GameTypes';
+import { ON_CARD_FLIP } from '../data/GameEvents';
+import { Logger } from '../utils/Logger';
+
+const { ccclass, property } = _decorator;
+
+@ccclass('CardView')
+export class CardView extends Component {
+
+  // ─── Serialized properties ──────────────────────────────
+  @property(Node) private _frontFace: Node = null!;
+  @property(Node) private _backFace:  Node = null!;
+  @property(Button) private _flipBtn: Button = null!;
+
+  // ─── Private state ──────────────────────────────────────
+  private _cardData: ICardData | null = null;
+  private _state: CardState = CardState.FACE_DOWN;
+
+  // ─── Lifecycle ──────────────────────────────────────────
+  onLoad(): void {
+    // Cache references tại đây nếu cần
+    this._flipBtn.node.on('click', this._onFlipTap, this);
+  }
+
+  onDestroy(): void {
+    // Luôn cleanup
+    this._flipBtn.node.off('click', this._onFlipTap, this);
+  }
+
+  // ─── Public API (gọi từ Manager) ───────────────────────
+  init(data: ICardData): void {
+    this._cardData = data;
+    this._setState(CardState.FACE_DOWN);
+  }
+
+  setState(state: CardState): void {
+    this._setState(state);
+  }
+
+  // ─── Private ────────────────────────────────────────────
+  private _onFlipTap(): void {
+    if (!this._cardData || this._state !== CardState.FACE_DOWN) return;
+    Logger.info('[CardView]', 'User tapped card', this._cardData.cardId);
+    cc.director.emit(ON_CARD_FLIP, { cardId: this._cardData.cardId });
+    // ❌ Không tự flip — để CardManager xử lý và gọi setState lại
+  }
+
+  private _setState(state: CardState): void {
+    this._state = state;
+    this._updateVisual(state);
+  }
+
+  private _updateVisual(state: CardState): void {
+    const faceUp = state === CardState.FACE_UP || state === CardState.MATCHED;
+    this._frontFace.active = faceUp;
+    this._backFace.active  = !faceUp;
+    // Thêm animation nếu cần
+  }
+}
+```
+
+---
+
+## CardView – Chi tiết
+
+### Flip animation
+- Animation chạy trong `_updateVisual` — không trong event handler
+- Dùng `tween` của Cocos, không dùng setTimeout
+- Khi `MATCHED`: thêm hiệu ứng (scale/glow) — không block input
+
+### Input guard
+```typescript
+private _onFlipTap(): void {
+  // Guard: chỉ cho flip khi FACE_DOWN
+  if (this._state !== CardState.FACE_DOWN) return;
+  // Guard: không có data
+  if (!this._cardData) return;
+  // ...
+}
+```
+
+---
+
+## GameHUD – In-game UI
+
+```typescript
+@ccclass('GameHUD')
+export class GameHUD extends Component {
+
+  @property(Label) private _timerLabel: Label = null!;
+  @property(Label) private _matchCountLabel: Label = null!;
+
+  onLoad(): void {
+    cc.director.on(ON_CARD_MATCHED, this._onMatched, this);
+    cc.director.on(ON_GAME_TIMEOUT, this._onTimeout, this);
+  }
+
+  onDestroy(): void {
+    cc.director.off(ON_CARD_MATCHED, this._onMatched, this);
+    cc.director.off(ON_GAME_TIMEOUT, this._onTimeout, this);
+  }
+
+  updateTimer(remainSeconds: number): void {
+    this._timerLabel.string = this._formatTime(remainSeconds);
+  }
+
+  private _onMatched(): void {
+    // update match count display
+  }
+
+  private _formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+}
+```
+
+---
+
+## ResultPanel
+
+```typescript
+interface IResultData {
+  finalScore: number;
+  timeUsed: number;      // giây
+  isNewBestScore: boolean;
+  totalMatched: number;
+  totalPairs: number;
+}
+
+@ccclass('ResultPanel')
+export class ResultPanel extends Component {
+  show(data: IResultData): void {
+    // Render result — không tính điểm ở đây
+    // Điểm đã được ScoreManager tính và truyền vào
+  }
+
+  private _onPlayAgainTap(): void {
+    cc.director.emit(ON_PLAY_AGAIN);
+  }
+
+  private _onLeaderboardTap(): void {
+    UIManager.instance.showScreen(ScreenName.LEADERBOARD);
+  }
+}
+```
+
+---
+
+## Cocos-specific Tips
+
+```typescript
+// ✅ Cache node trong onLoad
+onLoad(): void {
+  this._cardNode = this.node.getChildByName('Card')!;
+}
+
+// ❌ Tìm node trong update
+update(dt: number): void {
+  const card = this.node.find('Card'); // BAD — gọi mỗi frame
+}
+
+// ✅ Load prefab qua ResourceManager
+ResourceManager.instance.loadPrefab('CardPrefab', (prefab) => {
+  const node = instantiate(prefab);
+  this.node.addChild(node);
+});
+
+// ❌ Load trực tiếp trong component
+resources.load('prefabs/CardPrefab', Prefab, ...); // BAD
+```

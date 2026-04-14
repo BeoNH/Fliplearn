@@ -1,0 +1,179 @@
+---
+description: Fliplearn game logic, flow, và rules — áp dụng khi làm việc với game session, card matching, scoring
+globs: managers/**.ts, components/**.ts
+alwaysApply: false
+---
+
+# Game Logic & Flow
+
+## Tổng quan luồng chơi
+
+```
+[User chọn game] 
+    → Màn hình Thông tin chung (General Info Screen)
+        ├─ Tap Play (default config) ──────────────────────┐
+        └─ Tap chủ đề → Màn hình Thông tin chủ đề          │
+                            └─ Tap Start ─────────────────┘
+                                                           ↓
+                                               [Khởi tạo Game Session]
+                                                           ↓
+                                          [Hiển thị màn chơi – thẻ úp mặt]
+                                                           ↓
+                                              [Vòng lặp lật thẻ]
+                                                           ↓
+                              [Hoàn thành level → tự động qua level kế]
+                                                           ↓
+                                          [Kết thúc → Tính điểm → Kết quả]
+```
+
+---
+
+## Game Session
+
+### Khởi tạo (`GameManager.startSession`)
+```typescript
+interface IGameSession {
+  sessionId: string;
+  topicId: string | null;    // null = default config
+  config: IGameConfig;
+  currentLevel: number;
+  startTime: number;
+  cards: ICardData[];
+}
+
+interface IGameConfig {
+  levels: ILevelConfig[];
+  hasTimeLimit: boolean;
+  timeLimitSeconds: number | null;
+}
+
+interface ILevelConfig {
+  levelIndex: number;
+  cardPairs: ICardPair[];   // số cặp thẻ của level này
+}
+```
+
+---
+
+## Thẻ (Card)
+
+### Trạng thái thẻ
+```typescript
+enum CardState {
+  FACE_DOWN  = 'FACE_DOWN',   // úp mặt — chưa lật
+  FACE_UP    = 'FACE_UP',     // đang lật — chờ xử lý
+  MATCHED    = 'MATCHED',     // ghép đúng — không tương tác lại
+  LOCKED     = 'LOCKED',      // đang trong delay úp lại
+}
+```
+
+### Dữ liệu thẻ
+```typescript
+enum CardType {
+  TEXT       = 'TEXT',
+  IMAGE      = 'IMAGE',
+  DEFINITION = 'DEFINITION',
+}
+
+interface ICardData {
+  cardId: string;
+  pairId: string;    // 2 thẻ cùng pairId = 1 cặp
+  type: CardType;
+  content: string;   // text | imageUrl | definition
+}
+```
+
+---
+
+## Quy tắc lật thẻ
+
+### Trong mỗi lượt (turn)
+1. User chỉ được lật tối đa **2 thẻ**
+2. Không thể lật thẻ thứ 3 khi 2 thẻ đang ở `FACE_UP` chưa xử lý
+3. Thẻ đã `MATCHED` không thể tương tác
+
+### Sau khi lật 2 thẻ → `CardManager.checkMatch()`
+```
+Ghép đúng (pairId trùng nhau):
+  → setState cả 2 thẻ = MATCHED
+  → emit ON_CARD_MATCHED
+  → kiểm tra hoàn thành level
+
+Ghép sai:
+  → setState cả 2 thẻ = LOCKED
+  → hiển thị X giây (FLIP_DELAY_MS = 1500ms mặc định)
+  → sau delay → setState = FACE_DOWN
+  → emit ON_CARD_MISMATCH
+```
+
+---
+
+## Điều kiện kết thúc
+
+### Kết thúc level
+- Tất cả cặp thẻ trong level hiện tại có state = `MATCHED`
+- `GameManager` tự động chuyển sang `currentLevel + 1`
+
+### Kết thúc game session
+- Hoàn thành hết tất cả levels
+- **Hoặc** hết thời gian (nếu `config.hasTimeLimit = true`)
+
+### Khi kết thúc
+```typescript
+// FE gửi lên API
+NetworkManager.saveScore({
+  score: number,
+  time: number,   // thời gian chơi tính bằng giây
+  topicId: string
+});
+// endpoint: POST /api/saveScore
+```
+
+---
+
+## Điểm số & Leaderboard
+
+### Quy tắc tính điểm xếp hạng
+- Bảng xếp hạng tính **tổng điểm cao nhất** trên tất cả chủ đề
+- Mỗi chủ đề chỉ đóng góp **1 điểm số** cho mỗi người chơi
+- Chỉ lấy **điểm cao nhất** của mỗi chủ đề
+- Chơi lại: chỉ cập nhật nếu điểm mới **cao hơn** điểm cũ
+
+```
+Tổng điểm XH = Σ max_score(topic_i) với mọi topic_i
+```
+
+### Thứ tự xếp hạng
+1. Score cao hơn → xếp trước
+2. Nếu bằng score → thời gian thấp hơn → xếp trước
+
+---
+
+## Events (GameEvents.ts)
+
+```typescript
+// Card events
+export const ON_CARD_FLIP       = 'ON_CARD_FLIP';
+export const ON_CARD_MATCHED    = 'ON_CARD_MATCHED';
+export const ON_CARD_MISMATCH   = 'ON_CARD_MISMATCH';
+
+// Game session events
+export const ON_GAME_START      = 'ON_GAME_START';
+export const ON_LEVEL_COMPLETE  = 'ON_LEVEL_COMPLETE';
+export const ON_GAME_COMPLETE   = 'ON_GAME_COMPLETE';
+export const ON_GAME_TIMEOUT    = 'ON_GAME_TIMEOUT';
+
+// UI events
+export const ON_SHOW_RESULT     = 'ON_SHOW_RESULT';
+export const ON_TOPIC_SELECTED  = 'ON_TOPIC_SELECTED';
+```
+
+---
+
+## Constants (GameConstants.ts)
+
+```typescript
+export const FLIP_DELAY_MS      = 1500;   // delay úp lại khi sai
+export const DEFAULT_TIME_LIMIT = 120;    // giây (nếu có time limit)
+export const MAX_FLIP_COUNT     = 2;      // số thẻ tối đa mỗi lượt
+```
