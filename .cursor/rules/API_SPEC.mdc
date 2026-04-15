@@ -87,14 +87,14 @@ interface ICardPair {
 
 ```typescript
 export class NetworkManager {
-  private static _instance: NetworkManager | null = null;
+  private static instance: NetworkManager | null = null;
   private readonly BASE_URL = 'https://your-api.example.com';
 
   static get instance(): NetworkManager {
-    if (!NetworkManager._instance) {
-      NetworkManager._instance = new NetworkManager();
+    if (!NetworkManager.instance) {
+      NetworkManager.instance = new NetworkManager();
     }
-    return NetworkManager._instance;
+    return NetworkManager.instance;
   }
 
   async saveScore(payload: ISaveScoreRequest): Promise<ISaveScoreResponse> {

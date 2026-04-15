@@ -32,52 +32,55 @@ const { ccclass, property } = _decorator;
 export class CardView extends Component {
 
   // ─── Serialized properties ──────────────────────────────
-  @property(Node) private _frontFace: Node = null!;
-  @property(Node) private _backFace:  Node = null!;
-  @property(Button) private _flipBtn: Button = null!;
+  @property({ type: Node, tooltip: "Mô tả ngắn gọn" }) 
+  private frontFace: Node = null!;
+  @property({ type: Node, tooltip: "Mô tả ngắn gọn" }) 
+  private backFace:  Node = null!;
+  @property({ type: Button, tooltip: "Mô tả ngắn gọn" }) 
+  private flipBtn: Button = null!;
 
   // ─── Private state ──────────────────────────────────────
-  private _cardData: ICardData | null = null;
-  private _state: CardState = CardState.FACE_DOWN;
+  private cardData: ICardData | null = null;
+  private state: CardState = CardState.FACE_DOWN;
 
   // ─── Lifecycle ──────────────────────────────────────────
   onLoad(): void {
     // Cache references tại đây nếu cần
-    this._flipBtn.node.on('click', this._onFlipTap, this);
+    this.flipBtn.node.on('click', this.onFlipTap, this);
   }
 
   onDestroy(): void {
     // Luôn cleanup
-    this._flipBtn.node.off('click', this._onFlipTap, this);
+    this.flipBtn.node.off('click', this.onFlipTap, this);
   }
 
   // ─── Public API (gọi từ Manager) ───────────────────────
   init(data: ICardData): void {
-    this._cardData = data;
-    this._setState(CardState.FACE_DOWN);
+    this.cardData = data;
+    this.setState(CardState.FACE_DOWN);
   }
 
   setState(state: CardState): void {
-    this._setState(state);
+    this.setState(state);
   }
 
   // ─── Private ────────────────────────────────────────────
-  private _onFlipTap(): void {
-    if (!this._cardData || this._state !== CardState.FACE_DOWN) return;
-    Logger.info('[CardView]', 'User tapped card', this._cardData.cardId);
-    cc.director.emit(ON_CARD_FLIP, { cardId: this._cardData.cardId });
+  private onFlipTap(): void {
+    if (!this.cardData || this.state !== CardState.FACE_DOWN) return;
+    Logger.info('[CardView]', 'User tapped card', this.cardData.cardId);
+    cc.director.emit(ON_CARD_FLIP, { cardId: this.cardData.cardId });
     // ❌ Không tự flip — để CardManager xử lý và gọi setState lại
   }
 
-  private _setState(state: CardState): void {
-    this._state = state;
-    this._updateVisual(state);
+  private setState(state: CardState): void {
+    this.state = state;
+    this.updateVisual(state);
   }
 
-  private _updateVisual(state: CardState): void {
+  private updateVisual(state: CardState): void {
     const faceUp = state === CardState.FACE_UP || state === CardState.MATCHED;
-    this._frontFace.active = faceUp;
-    this._backFace.active  = !faceUp;
+    this.frontFace.active = faceUp;
+    this.backFace.active  = !faceUp;
     // Thêm animation nếu cần
   }
 }
@@ -88,17 +91,17 @@ export class CardView extends Component {
 ## CardView – Chi tiết
 
 ### Flip animation
-- Animation chạy trong `_updateVisual` — không trong event handler
+- Animation chạy trong `updateVisual` — không trong event handler
 - Dùng `tween` của Cocos, không dùng setTimeout
 - Khi `MATCHED`: thêm hiệu ứng (scale/glow) — không block input
 
 ### Input guard
 ```typescript
-private _onFlipTap(): void {
+private onFlipTap(): void {
   // Guard: chỉ cho flip khi FACE_DOWN
-  if (this._state !== CardState.FACE_DOWN) return;
+  if (this.state !== CardState.FACE_DOWN) return;
   // Guard: không có data
-  if (!this._cardData) return;
+  if (!this.cardData) return;
   // ...
 }
 ```
@@ -111,24 +114,26 @@ private _onFlipTap(): void {
 @ccclass('GameHUD')
 export class GameHUD extends Component {
 
-  @property(Label) private _timerLabel: Label = null!;
-  @property(Label) private _matchCountLabel: Label = null!;
+  @property({ type: Label, tooltip: "Mô tả ngắn gọn" }) 
+  private timerLabel: Label = null!;
+  @property({ type: Label, tooltip: "Mô tả ngắn gọn" }) 
+  private matchCountLabel: Label = null!;
 
   onLoad(): void {
-    cc.director.on(ON_CARD_MATCHED, this._onMatched, this);
-    cc.director.on(ON_GAME_TIMEOUT, this._onTimeout, this);
+    cc.director.on(ON_CARD_MATCHED, this.onMatched, this);
+    cc.director.on(ON_GAME_TIMEOUT, this.onTimeout, this);
   }
 
   onDestroy(): void {
-    cc.director.off(ON_CARD_MATCHED, this._onMatched, this);
-    cc.director.off(ON_GAME_TIMEOUT, this._onTimeout, this);
+    cc.director.off(ON_CARD_MATCHED, this.onMatched, this);
+    cc.director.off(ON_GAME_TIMEOUT, this.onTimeout, this);
   }
 
   updateTimer(remainSeconds: number): void {
-    this._timerLabel.string = this._formatTime(remainSeconds);
+    this.timerLabel.string = this.formatTime(remainSeconds);
   }
 
-  private _onMatched(): void {
+  private onMatched(): void {
     // update match count display
   }
 
@@ -160,11 +165,11 @@ export class ResultPanel extends Component {
     // Điểm đã được ScoreManager tính và truyền vào
   }
 
-  private _onPlayAgainTap(): void {
+  private onPlayAgainTap(): void {
     cc.director.emit(ON_PLAY_AGAIN);
   }
 
-  private _onLeaderboardTap(): void {
+  private onLeaderboardTap(): void {
     UIManager.instance.showScreen(ScreenName.LEADERBOARD);
   }
 }
@@ -177,7 +182,7 @@ export class ResultPanel extends Component {
 ```typescript
 // ✅ Cache node trong onLoad
 onLoad(): void {
-  this._cardNode = this.node.getChildByName('Card')!;
+  this.cardNode = this.node.getChildByName('Card')!;
 }
 
 // ❌ Tìm node trong update

@@ -61,7 +61,7 @@ export class GameManager {
   endSession(): void { /* ... */ }
 
   // ─── Private helpers ────────────────────────────────────────
-  private _initLevel(level: number): void { /* ... */ }
+  private initLevel(level: number): void { /* ... */ }
 }
 ```
 
@@ -87,7 +87,7 @@ cc.director.on(ON_CARD_MATCHED, this._onCardMatched, this);
 // Trong onDestroy() — luôn remove để tránh memory leak
 cc.director.off(ON_CARD_MATCHED, this._onCardMatched, this);
 
-private _onCardMatched(data: { cardId: string; pairId: string }): void {
+private onCardMatched(data: { cardId: string; pairId: string }): void {
   // xử lý
 }
 ```
@@ -156,8 +156,8 @@ async saveScore(payload: ISaveScoreRequest): Promise<ISaveScoreResponse> {
 // Tách hàm nếu > 30 dòng
 flipCard(cardId: string): void { /* ... */ }       // validate + setState
 checkMatch(cardA: string, cardB: string): void { /* ... */ }  // so sánh pairId
-private _handleMismatch(cardA: string, cardB: string): void { /* ... */ }
-private _handleMatch(cardA: string, cardB: string): void { /* ... */ }
+private handleMismatch(cardA: string, cardB: string): void { /* ... */ }
+private handleMatch(cardA: string, cardB: string): void { /* ... */ }
 ```
 
 ---
