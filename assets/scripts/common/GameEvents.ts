@@ -1,5 +1,4 @@
 // Card events
-export const ON_CARD_FLIP = 'ON_CARD_FLIP';
 export const ON_CARD_MATCHED = 'ON_CARD_MATCHED';
 export const ON_CARD_MISMATCH = 'ON_CARD_MISMATCH';
 export const ON_CARD_STATE_CHANGED = 'ON_CARD_STATE_CHANGED';
