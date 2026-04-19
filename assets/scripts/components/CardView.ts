@@ -54,6 +54,14 @@ export class CardView extends Component {
         this.applyState(data.state);
     }
 
+    private applyState(state: CardState): void {
+        this.state = state;
+        const faceUp = state === CardState.FACE_UP || state === CardState.MATCHED || state === CardState.LOCKED;
+        this.frontFace.active = faceUp;
+        this.backFace.active = !faceUp;
+        this.flipBtn.interactable = state === CardState.FACE_DOWN;
+    }
+
     private setCardData() {
         if (!this.cardInfo) return;
         this.image.node.active = false;
@@ -83,13 +91,6 @@ export class CardView extends Component {
         }
     }
 
-    private applyState(state: CardState): void {
-        this.state = state;
-        const faceUp = state === CardState.FACE_UP || state === CardState.MATCHED || state === CardState.LOCKED;
-        this.frontFace.active = faceUp;
-        this.backFace.active = !faceUp;
-        this.flipBtn.interactable = state === CardState.FACE_DOWN;
-    }
 }
 
 

@@ -3,6 +3,7 @@ import { ON_LEVEL_INIT } from "../common/GameEvents";
 import { IGameSession, ILevelConfig, ILevelInitEvent } from "../common/GameTypes";
 import { Logger } from "../utils/Logger";
 import { CardManager } from "./CardManager";
+import { ScoreManager } from "./ScoreManager";
 
 export class GameManager {
     private static _instance: GameManager | null = null;
@@ -37,6 +38,8 @@ export class GameManager {
             sessionId: this.newSessionId(),
             config,
             currentLevel: 0,
+            totalScore: 0,
+            totalTimeSec: 0,
             startTimeMs,
         };
         this.session = null;
@@ -60,7 +63,7 @@ export class GameManager {
         const payLoad: ILevelInitEvent = { cards: cards.slice(), rows: level.rows, cols: level.cols }
         BroadcastReceiver.send(ON_LEVEL_INIT, payLoad);
 
-        // ScoreManager.instance.startLevel(level.cardPairs.length);
+        ScoreManager.instance.startLevel(level.pairs.length);
 
         // if (level.hasTimeLimit) {
         //     const limit = level.timeLimit ?? 60;
@@ -68,6 +71,24 @@ export class GameManager {
         // } else {
         //     TimerManager.instance.stop();
         // }
+    }
+
+    checkLevelComplete(): void {
+        const session = this.session;
+        if (!session) return;
+
+        if (!ScoreManager.instance.isLevelComplete()) return;
+
+        // const payload: ILevelCompleteEvent = { levelIndex: session.currentLevel };
+        // director.emit(ON_LEVEL_COMPLETE, payload);
+
+        const next = session.currentLevel + 1;
+        if (next < session.config.length) {
+            this.initLevel(next);
+            return;
+        }
+
+        // void this.endSession();
     }
 
     private newSessionId(): string {

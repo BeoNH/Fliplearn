@@ -42,6 +42,8 @@ export interface IGameSession {
     sessionId: string;
     config: ILevelConfig[];
     currentLevel: number;
+    totalScore: number;
+    totalTimeSec: number;
     startTimeMs: number;
 }
 
@@ -49,5 +51,12 @@ export interface ILevelInitEvent {
     cards: ICardInfo[];
     rows: number;
     cols: number;
-  }
+}
+
+export interface IScoreState {
+  matchedPairs: number;
+  totalPairs: number;
+//   moves: number;
+}
+
 

@@ -2,7 +2,7 @@ import { CardType } from "./common/GameTypes";
 
 export const apiGameInfo = {
     gameId: "8386",
-    title: "Fliplearn",
+    title: "GameDemo",
     description: "Hiển thị nội dung về thông tin, mô tả, luật chơi game\n   • Trường hợp user chọn chơi theo chủ đề, nội dung mô tả sẽ là mô tả về chủ đề\n   • Hỗ trợ đa ngôn ngữ",
     mismatchDelay: 1.5,
 };

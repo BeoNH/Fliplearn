@@ -2,6 +2,8 @@ import BroadcastReceiver from "../common/BroadcastReceiver";
 import { ON_CARD_STATE_CHANGED } from "../common/GameEvents";
 import { CardState, ICardInfo, ILevelConfig } from "../common/GameTypes";
 import { Logger } from "../utils/Logger";
+import { GameManager } from "./GameManager";
+import { ScoreManager } from "./ScoreManager";
 
 export class CardManager {
     private static _instance: CardManager | null = null;
@@ -85,9 +87,11 @@ export class CardManager {
         this.setState(cardBId, CardState.MATCHED);
         this.flipped = [];
 
-        // const payload: ICardMatchedEvent = { cardAId, cardBId, pairId };
+        const payload = { cardAId, cardBId, pairId };
         // director.emit(ON_CARD_MATCHED, payload);
-        // Logger.info('[CardManager]', 'matched', payload);
+        // GameManager.instance.checkLevelComplete();
+        ScoreManager.instance.recordMatchedPair();
+        Logger.info('[CardManager]', 'matched', payload);
     }
 
     private handleMismatch(cardAId: string, cardBId: string): void {
