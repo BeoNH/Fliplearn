@@ -26,6 +26,10 @@ export class ScoreManager {
         this.state.matchedPairs += 1;
     }
 
+    getStatePair(): IScoreState {
+        return this.state;
+    }
+
     isLevelComplete(): boolean {
         return this.state.totalPairs > 0 &&
             this.state.matchedPairs >= this.state.totalPairs;

@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Node, Prefab, UITransform } from 'cc';
+import { _decorator, Component, director, instantiate, Node, Prefab, UITransform } from 'cc';
 import BroadcastReceiver from '../common/BroadcastReceiver';
 import { ON_LEVEL_INIT } from '../common/GameEvents';
 import { ICardInfo, ILevelInitEvent } from '../common/GameTypes';
@@ -18,6 +18,7 @@ export class GameBootstrap extends Component {
     protected onLoad(): void {
         BroadcastReceiver.register(ON_LEVEL_INIT, this.initializeGrid.bind(this), this);
 
+        director.preloadScene("Menu");
         GameManager.instance.initSession();
     }
 
@@ -28,6 +29,7 @@ export class GameBootstrap extends Component {
 
     private initializeGrid(evt: ILevelInitEvent) {
         const { cards, rows, cols } = evt;
+        this.cardGrid.removeAllChildren();
 
         const bg = this.cardPrefab.data.getChildByPath('Back');
         const ui = bg?.getComponent(UITransform);

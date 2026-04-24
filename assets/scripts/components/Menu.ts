@@ -1,6 +1,10 @@
 import { _decorator, Component, director, EventTouch, Label, Node, tween, Tween, Vec3 } from 'cc';
 import { apiGameInfo, apiPlay } from '../dataDemo';
 import { GameManager } from '../managers/GameManager';
+import { PopupBXH } from './Popup/PopupBXH';
+import { i18n } from '../i18n/LocalizationManager';
+import { urlParam } from '../managers/NetworkManager';
+import AssetLoader from '../services/AssetLoader';
 const { ccclass, property } = _decorator;
 
 @ccclass('Menu')
@@ -13,11 +17,30 @@ export class Menu extends Component {
     loadingIcon: Node = null!;
 
     protected onLoad(): void {
+        i18n.switchLanguage(urlParam("lang") ?? "vi");
+
+        GameManager.instance.GameInfo = apiGameInfo;
         this.labelDesc.string = apiGameInfo.description;
     }
 
     protected onDestroy(): void {
         Tween.stopAllByTarget(this.loadingIcon);
+    }
+
+    private async preloadLevelAssets() {
+        const tasks: Promise<any>[] = [];
+    
+        for (const level of apiPlay) {
+            for (const pair of level.pairs) {
+                [pair.cardA, pair.cardB].forEach(card => {
+                    if (card.image) {
+                        tasks.push(AssetLoader.loadSpriteFrame(card.image));
+                    }
+                });
+            }
+        }
+    
+        await Promise.all(tasks);
     }
 
 
@@ -33,17 +56,17 @@ export class Menu extends Component {
             )
             .start();
 
-        director.preloadScene("Game", () => { }, () => {
+        director.preloadScene("Game", async () => { }, async () => {
             GameManager.instance.levelConfig = apiPlay;
+            
+            await this.preloadLevelAssets();
 
-            this.scheduleOnce(() => {
-                director.loadScene("Game");
-            }, 0.3);
+            director.loadScene("Game");
         });
     }
 
     onTapBXH() {
-
+        PopupBXH.show();
     }
 }
 

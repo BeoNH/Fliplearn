@@ -18,6 +18,12 @@ export enum CardType {
     DEFINITION = 'DEFINITION',
 }
 
+export interface IGameInfo {
+    gameId: number;
+    title: string;
+    description: string;
+}
+
 export interface ICardInfo {
     cardId: string;
     pairId: string;
@@ -42,21 +48,22 @@ export interface IGameSession {
     sessionId: string;
     config: ILevelConfig[];
     currentLevel: number;
-    totalScore: number;
-    totalTimeSec: number;
+    finalScore: number;
+    timeUsedSec: number;
     startTimeMs: number;
 }
 
 export interface ILevelInitEvent {
+    level: ILevelConfig;
     cards: ICardInfo[];
     rows: number;
     cols: number;
 }
 
 export interface IScoreState {
-  matchedPairs: number;
-  totalPairs: number;
-//   moves: number;
+    matchedPairs: number;
+    totalPairs: number;
+    //   moves: number;
 }
 
 

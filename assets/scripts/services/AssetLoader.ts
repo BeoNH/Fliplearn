@@ -1,15 +1,6 @@
-import {
-    assetManager,
-    Asset,
-    ImageAsset,
-    Texture2D,
-    SpriteFrame,
-    AudioClip,
-    VideoPlayer,
-    Node,
-} from 'cc';
+import { assetManager, Asset, ImageAsset, Texture2D, SpriteFrame, AudioClip, resources, } from 'cc';
 
-export class AssetLoader {
+export default class AssetLoader {
 
     private static cache = new Map<string, any>();
 
@@ -20,7 +11,11 @@ export class AssetLoader {
 
         return new Promise((resolve, reject) => {
             assetManager.loadRemote(url, options ?? {}, (err, data) => {
-                if (err) { reject(err); return; }
+                if (err) { 
+                    console.warn(`[AssetLoader] Remote fail: ${url}`, err);
+                    resolve(null);
+                    return; 
+                }
                 this.cache.set(url, data);
                 resolve(data as T);
             });
@@ -70,6 +65,28 @@ export class AssetLoader {
     }
 
     // ─── Video ───────────────────────────────────────────────────────────────
+
+
+    // ─── Asset ───────────────────────────────────────────────────────────────
+    static loadResAsync<T extends Asset>(path: string, type: new () => T): Promise<T> {
+        const cached = this.cache.get(path);
+        if (cached) {
+            return Promise.resolve(cached as T);
+        }
+
+        return new Promise<T>((resolve, reject) => {
+            resources.load(path, type, (err, asset: T) => {
+                if (err) {
+                    console.error('[AssetLoader] load fail:', path, err);
+                    reject(err);
+                    return;
+                }
+                this.cache.set(path, asset);
+
+                resolve(asset);
+            });
+        });
+    }
 
     // ─── Cache ───────────────────────────────────────────────────────────────
 

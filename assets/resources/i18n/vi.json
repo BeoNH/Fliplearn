@@ -1,0 +1,31 @@
+{
+    "common": {},
+    "menu": {},
+    "gamehud": {
+        "matched": "{0} Cặp"
+    },
+    "introduc": {
+        "title": "Giới thiệu",
+        "content": "Nội dung hướng dẫn chơi game. Nội dung hướng dẫn chơi game. \nDùng |n để xuống dòng."
+    },
+    "exitgame": {
+        "title": "Xác nhận thoát!",
+        "content": "Thoát game sẽ không được ghi nhận kết quả. Bạn chắc chắn muốn thoát game?",
+        "continue": "Tiếp tục",
+        "exit": "Thoát game"
+    },
+    "donelevel": {
+        "title": "CHIẾN THẮNG",
+        "content": "Tuyệt vời! Bạn hoàn thành level rất tốt. Tiếp tục level tiếp theo nào!",
+        "score": "Điểm:",
+        "continue": "Tiếp tục",
+        "stop": "Dừng lại"
+    },
+    "result": {
+        "title": "Kết Quả",
+        "txt1": "Hoàn thành lượt chơi!",
+        "txt2": "ĐIỂM SỐ",
+        "topic": "Chủ đề",
+        "BXH": "BXH"
+    }
+}

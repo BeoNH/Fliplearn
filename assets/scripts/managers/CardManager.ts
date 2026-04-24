@@ -1,5 +1,5 @@
 import BroadcastReceiver from "../common/BroadcastReceiver";
-import { ON_CARD_STATE_CHANGED } from "../common/GameEvents";
+import { ON_CARD_MATCHED, ON_CARD_STATE_CHANGED } from "../common/GameEvents";
 import { CardState, ICardInfo, ILevelConfig } from "../common/GameTypes";
 import { Logger } from "../utils/Logger";
 import { GameManager } from "./GameManager";
@@ -16,7 +16,6 @@ export class CardManager {
     }
     private constructor() { }
 
-    FLIP_DELAY_MS: number = 1500;
     private cards: ICardInfo[] = [];
     private stateByCardId: Map<string, CardState> = new Map();
     private flipped: string[] = [];
@@ -87,10 +86,11 @@ export class CardManager {
         this.setState(cardBId, CardState.MATCHED);
         this.flipped = [];
 
-        const payload = { cardAId, cardBId, pairId };
-        // director.emit(ON_CARD_MATCHED, payload);
-        // GameManager.instance.checkLevelComplete();
         ScoreManager.instance.recordMatchedPair();
+        BroadcastReceiver.send(ON_CARD_MATCHED);
+        GameManager.instance.checkLevelComplete();
+        
+        const payload = { cardAId, cardBId, pairId };
         Logger.info('[CardManager]', 'matched', payload);
     }
 
@@ -98,15 +98,12 @@ export class CardManager {
         this.setState(cardAId, CardState.LOCKED);
         this.setState(cardBId, CardState.LOCKED);
 
-        // const payload: ICardMismatchEvent = { cardAId, cardBId };
-        // director.emit(ON_CARD_MISMATCH, payload);
-
         this.mismatchTimerId = setTimeout(() => {
             this.mismatchTimerId = null;
             this.setState(cardAId, CardState.FACE_DOWN);
             this.setState(cardBId, CardState.FACE_DOWN);
             this.flipped = [];
-        }, this.FLIP_DELAY_MS);
+        }, 1.3 * 1000);
     }
 
     private clearTimers(): void {

@@ -11,11 +11,6 @@ export const ON_GAME_COMPLETE = 'ON_GAME_COMPLETE';
 export const ON_GAME_TIMEOUT = 'ON_GAME_TIMEOUT';
 export const ON_GAME_RESET = 'ON_GAME_RESET';
 
-// UI events
-export const ON_SHOW_RESULT = 'ON_SHOW_RESULT';
-export const ON_TOPIC_SELECTED = 'ON_TOPIC_SELECTED';
-export const ON_PLAY_AGAIN = 'ON_PLAY_AGAIN';
-export const ON_OPEN_LEADERBOARD = 'ON_OPEN_LEADERBOARD';
 
 // Data request/update events
 export const ON_REQUEST_TOPICS = 'ON_REQUEST_TOPICS';
