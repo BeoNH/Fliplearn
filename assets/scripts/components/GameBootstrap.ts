@@ -12,6 +12,7 @@ export class GameBootstrap extends Component {
 
     @property({ type: Node, tooltip: 'Danh sách THẺ BÀI trong scene' })
     public cardGrid: Node = null!;
+    
     @property({ type: Prefab, tooltip: 'Thẻ bài' })
     public cardPrefab: Prefab = null!;
 
