@@ -1,7 +1,7 @@
 import { _decorator, Component, director, instantiate, Node, Prefab, UITransform } from 'cc';
 import BroadcastReceiver from '../common/BroadcastReceiver';
 import { ON_LEVEL_INIT } from '../common/GameEvents';
-import { ICardInfo, ILevelInitEvent } from '../common/GameTypes';
+import { ILevelInitEvent } from '../common/GameTypes';
 import { Logger } from '../utils/Logger';
 import { GameManager } from '../managers/GameManager';
 import { CardView } from './CardView';

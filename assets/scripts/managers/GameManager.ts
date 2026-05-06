@@ -21,8 +21,9 @@ export class GameManager {
 
     private session: IGameSession | null = null;
 
-    levelConfig: ILevelConfig[] = [];
     GameInfo: IGameInfo;
+    LevelConfig: ILevelConfig[] = [];
+    ApiSession: any;
 
     initSession() {
         this.reset();
@@ -35,10 +36,11 @@ export class GameManager {
     }
 
     private startSession(): void {
-        const config = this.levelConfig;
+        const config = this.LevelConfig;
         const startTimeMs = Date.now();
         const session: IGameSession = {
-            sessionId: this.newSessionId(),
+            sessionId: this.ApiSession.sessionId ?? -1,
+            session: this.ApiSession.session ?? this.newSessionId(),
             config,
             currentLevel: 0,
             finalScore: 0,
@@ -50,7 +52,7 @@ export class GameManager {
 
         this.initLevel(0);
         // director.emit(ON_GAME_START, { sessionId: session.sessionId, topicId });
-        Logger.info('[GameManager]', 'startSession', session.sessionId);
+        Logger.info('[GameManager]', 'startSession', session.sessionId, session.session);
     }
 
     private initLevel(levelIndex: number): void {
@@ -111,8 +113,10 @@ export class GameManager {
         if (!session) return null;
 
         return {
+            sessionId: session.sessionId,
+            session: session.session,
             score: session.finalScore,
-            time: session.timeUsedSec
+            playTime: session.timeUsedSec
         }
     }
 

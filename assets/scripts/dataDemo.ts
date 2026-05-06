@@ -3,7 +3,8 @@ import { CardType } from "./common/GameTypes";
 export const apiGameInfo = {
     gameId: 8386,
     title: "GameDemo",
-    description: "Hiển thị nội dung về thông tin, mô tả, luật chơi game\n   • Trường hợp user chọn chơi theo chủ đề, nội dung mô tả sẽ là mô tả về chủ đề\n   • Hỗ trợ đa ngôn ngữ"
+    description: "Hiển thị nội dung về thông tin, mô tả, luật chơi game\n   • Trường hợp user chọn chơi theo chủ đề, nội dung mô tả sẽ là mô tả về chủ đề\n   • Hỗ trợ đa ngôn ngữ",
+    introduction: "Luật chơi của game"
 };
 
 export const apiPlay = [
@@ -16,11 +17,11 @@ export const apiPlay = [
         pairs: [
             {
                 cardA: { cardId: 'c1a', pairId: 'p1', type: CardType.TEXT, content: 'Hello', image: '' },
-                cardB: { cardId: 'c1b', pairId: 'p1', type: CardType.DEFINITION, content: 'Xin chào', image: 'https://cdn.gamebatta.com/astrobot-4721/van_lich_ava.png' },
+                cardB: { cardId: 'c1b', pairId: 'p1', type: CardType.DEFINITION, content: 'Xin chào', image: '' },
             },
             {
                 cardA: { cardId: 'c2a', pairId: 'p2', type: CardType.TEXT, content: 'Apple', image: '' },
-                cardB: { cardId: 'c2b', pairId: 'p2', type: CardType.IMAGE, content: 'Quả táo', image: 'https://cdn.gamebatta.com/astrobot-4721/minh_giap_ava.png' },
+                cardB: { cardId: 'c2b', pairId: 'p2', type: CardType.IMAGE, content: 'Quả táo', image: '' },
             },
             {
                 cardA: { cardId: 'c3a', pairId: 'p3', type: CardType.TEXT, content: 'Cat', image: '' },
@@ -91,3 +92,74 @@ export const apiPlay = [
         ]
     }
 ];
+
+
+// {
+//     "success": true,
+//     "code": 0,
+//     "message": "Success",
+//     "data": {
+//         "gameSession": {
+//             "session": "99a38a4f-0a58-4ef4-b9ae-088e0a61c186",
+//             "sessionId": 15
+//         },
+//         "topic": {
+//             "name": "Hello World",
+//             "introduction": {
+//                 "en": "Tiéng anh",
+//                 "my": "tiếng myanmar",
+//                 "vi": "Giới thiệu"
+//             },
+//             "options": {
+//                 "levels": [
+//                     {
+//                         "duration": 30,
+//                         "pairsLength": 3
+//                     },
+//                     {
+//                         "duration": 30,
+//                         "pairsLength": 4
+//                     },
+//                     {
+//                         "duration": 30,
+//                         "pairsLength": 5
+//                     }
+//                 ],
+//                 "version": 1,
+//                 "durationEnable": true
+//             }
+//         },
+//         "pairs": [
+//             {
+//                 "pairAtext": "Cat",
+//                 "pairBtext": {
+//                     "en": "meow, meow, meow,meow",
+//                     "my": "my lằn tờ ngoằn",
+//                     "vi": "Mèo méo meo mèo meo"
+//                 },
+//                 "pairBimage": null,
+//                 "bonusPoint": 5
+//             },
+//             {
+//                 "pairAtext": "Cat 2",
+//                 "pairBtext": {
+//                     "en": "meow, meow, meow,meow 2",
+//                     "my": "my lằn tờ ngoằn 2",
+//                     "vi": "Mèo méo meo mèo meo 2"
+//                 },
+//                 "pairBimage": null,
+//                 "bonusPoint": 5
+//             },
+//             {
+//                 "pairAtext": "Cat 3",
+//                 "pairBtext": {
+//                     "en": "meow, meow, meow,meow 3",
+//                     "my": "my lằn tờ ngoằn 3",
+//                     "vi": "Mèo méo meo mèo meo 3"
+//                 },
+//                 "pairBimage": null,
+//                 "bonusPoint": 5
+//             }
+//         ]
+//     }
+// }

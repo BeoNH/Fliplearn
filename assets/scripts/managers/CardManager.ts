@@ -74,23 +74,23 @@ export class CardManager {
         }
 
         if (a.pairId === b.pairId) {
-            this.handleMatch(cardAId, cardBId, a.pairId);
+            this.handleMatch(cardAId, cardBId, a.bonus);
             return;
         }
 
         this.handleMismatch(cardAId, cardBId);
     }
 
-    private handleMatch(cardAId: string, cardBId: string, pairId: string): void {
+    private handleMatch(cardAId: string, cardBId: string, bonus?: number): void {
         this.setState(cardAId, CardState.MATCHED);
         this.setState(cardBId, CardState.MATCHED);
         this.flipped = [];
 
-        ScoreManager.instance.recordMatchedPair();
+        ScoreManager.instance.recordMatchedPair(bonus ?? 0);
         BroadcastReceiver.send(ON_CARD_MATCHED);
         GameManager.instance.checkLevelComplete();
         
-        const payload = { cardAId, cardBId, pairId };
+        const payload = { cardAId, cardBId, bonus };
         Logger.info('[CardManager]', 'matched', payload);
     }
 

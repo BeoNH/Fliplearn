@@ -22,6 +22,7 @@ export interface IGameInfo {
     gameId: number;
     title: string;
     description: string;
+    introduction: string;
 }
 
 export interface ICardInfo {
@@ -30,6 +31,7 @@ export interface ICardInfo {
     type: CardType;
     content: string;
     image: string;
+    bonus: number;
 }
 
 export interface ILevelConfig {
@@ -45,7 +47,8 @@ export interface ILevelConfig {
 }
 
 export interface IGameSession {
-    sessionId: string;
+    sessionId: number;
+    session: string;
     config: ILevelConfig[];
     currentLevel: number;
     finalScore: number;
@@ -63,7 +66,7 @@ export interface ILevelInitEvent {
 export interface IScoreState {
     matchedPairs: number;
     totalPairs: number;
-    //   moves: number;
+    bonusPairs: number;
 }
 
 

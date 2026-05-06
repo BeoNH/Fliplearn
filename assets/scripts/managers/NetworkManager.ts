@@ -53,6 +53,8 @@ export interface NetworkConfig {
     pingIntervalMs?: number;
     /** URL gốc cho các endpoint HTTP REST */
     httpBaseUrl?: string;
+    /** Endpoint dùng để lấy access token (JWT / OAuth) trước khi gọi API */
+    accessToken?: string;
 }
 
 const DEFAULT_CONFIG: Required<NetworkConfig> = {
@@ -63,7 +65,8 @@ const DEFAULT_CONFIG: Required<NetworkConfig> = {
     reconnectBaseDelay: 1000,
     maxReconnectDelay: 30_000,
     pingIntervalMs: 3000,
-    httpBaseUrl: urlParam('url_api') ?? "https://apiwordpuzzle-mytel.elsapro.net",
+    httpBaseUrl: urlParam('url_api') ?? "https://api-dev.lingox.co/minigame",
+    accessToken: "",
 };
 
 // ── Kiểu dữ liệu nội bộ ───────────────────────────────────────────────────────
@@ -419,6 +422,14 @@ export class NetworkManager {
         this.cfg.httpBaseUrl = url;
     }
 
+    /** Cập nhật access token dùng cho xác thực API (Bearer token) trong runtime. */
+    setAccessToken(token: string): void {
+        this.cfg.accessToken = token;
+    }
+    get hasAccessToken(): boolean {
+        return !!this.cfg.accessToken;
+    }
+
     /**
      * Gửi HTTP request JSON tổng quát.
      * @param path   Đường dẫn endpoint, ví dụ: "/api/leaderboard"
@@ -435,14 +446,18 @@ export class NetworkManager {
 
         try {
             const response = await fetch(url, {
-                headers: { "Content-Type": "application/json", ...(init.headers ?? {}) },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + this.cfg.accessToken,
+                    ...(init.headers ?? {})
+                },
                 ...init,
             });
             if (!response.ok) {
                 console.warn(`[NetworkManager] HTTP ${response.status} ${response.statusText} — ${url}`);
                 return null;
             }
-            
+
             const data = await response.json() as T;
             console.log(`[NetworkManager] HTTP RES ${url}`, data);
             return data;
@@ -455,11 +470,13 @@ export class NetworkManager {
 
     /** Tiện ích: HTTP GET */
     httpGet<T>(path: string): Promise<T> {
-        return this.httpRequest<T>(path, { method: "GET" });
+        return this.httpRequest<T>(path, {
+            method: "GET"
+        });
     }
 
     /** Tiện ích: HTTP POST với body JSON */
-    httpPost<TRes, TReq = unknown>(path: string, body: TReq): Promise<TRes> {
+    httpPost<TRes = any, TReq = unknown>(path: string, body: TReq): Promise<TRes> {
         return this.httpRequest<TRes>(path, {
             method: "POST",
             body: JSON.stringify(body),

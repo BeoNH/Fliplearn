@@ -13,17 +13,18 @@ export class ScoreManager {
     private constructor() { }
 
 
-    private state: IScoreState = { matchedPairs: 0, totalPairs: 0 };
+    private state: IScoreState = { matchedPairs: 0, totalPairs: 0, bonusPairs: 0 };
 
 
     startLevel(totalPairs: number): void {
-        this.state = { matchedPairs: 0, totalPairs };
+        this.state = { matchedPairs: 0, totalPairs, bonusPairs: 0 };
         Logger.info('[ScoreManager]', 'startLevel', totalPairs);
     }
 
 
-    recordMatchedPair(): void {
+    recordMatchedPair(bonus: number): void {
         this.state.matchedPairs += 1;
+        this.state.bonusPairs += bonus;
     }
 
     getStatePair(): IScoreState {
@@ -36,9 +37,11 @@ export class ScoreManager {
     }
 
     calcFinalScore(timeUsedSeconds: number): number {
-        const base = this.state.matchedPairs * 100;
-        const timePenalty = Math.max(0, Math.floor(timeUsedSeconds)) * 1;
-        return Math.max(0, base - timePenalty);
+        const timeToPairs = this.state.matchedPairs * (timeUsedSeconds > 0 ? 20 : 5);
+        const timePenalty = Math.max(0, Math.floor(timeUsedSeconds));
+        const bonusPoint = this.state.bonusPairs;
+        // return Math.max(0, timeToPairs - timePenalty + bonusPoint);
+        return Math.max(0, bonusPoint);
     }
 }
 

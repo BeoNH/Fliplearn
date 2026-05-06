@@ -1,31 +1,38 @@
 {
     "common": {},
-    "menu": {},
+    "menu": {
+        "btnPlay": "Start"
+    },
     "gamehud": {
         "matched": "{0} Pairs"
     },
     "introduc": {
-        "title": "Introduction",
-        "content": "Game instructions content. Game instructions content.\nUse |n for line breaks."
+        "title": "Introduction"
     },
     "exitgame": {
         "title": "Confirm Exit!",
-        "content": "Exiting the game will not save your progress. Are you sure you want to exit?",
+        "content": "Exiting the game will not save your results. Are you sure you want to exit?",
         "continue": "Continue",
         "exit": "Exit Game"
     },
     "donelevel": {
         "title": "VICTORY",
-        "content": "Great job! You completed the level very well. Let's move on to the next level!",
+        "content": "Great job! You completed the level very well. Let's move to the next level!",
         "score": "Score:",
         "continue": "Continue",
         "stop": "Stop"
     },
     "result": {
         "title": "Result",
-        "txt1": "You have completed the session!",
+        "txt1": "Round completed!",
         "txt2": "SCORE",
         "topic": "Topic",
         "BXH": "Leaderboard"
+    },
+    "leaderboard": {
+        "btnPlay": "Play Now",
+        "nonRank": "You are not on the leaderboard yet. Play now to score and appear in the Top!",
+        "emptyTxt": "No players yet!",
+        "emptyTxt1": "Be the first to join and lead the leaderboard now!"
     }
 }

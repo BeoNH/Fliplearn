@@ -1,6 +1,4 @@
-import { director } from 'cc';
 import { Logger } from '../utils/Logger';
-import { ON_GAME_TIMEOUT } from '../common/GameEvents';
 import { GameManager } from './GameManager';
 
 export class TimerManager {

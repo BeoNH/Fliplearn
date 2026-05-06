@@ -1,7 +1,8 @@
-import { _decorator, instantiate, Prefab } from 'cc';
+import { _decorator, instantiate, Label, Prefab } from 'cc';
 import Popup from '../../common/Popup';
 import AssetLoader from '../../services/AssetLoader';
 import { TimerManager } from '../../managers/TimerManager';
+import { GameManager } from '../../managers/GameManager';
 
 const { ccclass, property } = _decorator;
 
@@ -17,6 +18,13 @@ export class PopupIntroduc extends Popup {
     show() {
         super.show();
         TimerManager.instance.stop();
+    }
+
+    @property({ type: Label, tooltip: 'Hiển thị nội dung' })
+    private viewLabel: Label = null!;
+
+    protected onAfterShow(): void {
+        this.viewLabel.string = GameManager.instance.GameInfo.introduction;
     }
 
     protected onAfterHide(): void {

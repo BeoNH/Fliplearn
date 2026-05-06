@@ -1,12 +1,13 @@
 {
     "common": {},
-    "menu": {},
+    "menu": {
+        "btnPlay": "Chơi"
+    },
     "gamehud": {
         "matched": "{0} Cặp"
     },
     "introduc": {
-        "title": "Giới thiệu",
-        "content": "Nội dung hướng dẫn chơi game. Nội dung hướng dẫn chơi game. \nDùng |n để xuống dòng."
+        "title": "Giới thiệu"
     },
     "exitgame": {
         "title": "Xác nhận thoát!",
@@ -27,5 +28,11 @@
         "txt2": "ĐIỂM SỐ",
         "topic": "Chủ đề",
         "BXH": "BXH"
+    },
+    "leaderboard": {
+        "btnPlay": "Chơi ngay",
+        "nonRank": "Bạn chưa có tên trên bảnh xếp hạng. Hãy chơi ngay để ghi điểm và xuất hiện trong Top!",
+        "emptyTxt": "Chưa có người chơi nào!",
+        "emptyTxt1": "Hãy là người đầu tiên tham gia và dẫn đầu bảng xếp hạng ngay nào!"
     }
 }

@@ -6,6 +6,8 @@ import { GameManager } from '../../managers/GameManager';
 import { PopupBXH } from './PopupBXH';
 import { LayerText } from '../LayerText';
 import { i18n } from '../../i18n/LocalizationManager';
+import { NetworkManager } from '../../managers/NetworkManager';
+import { Logger } from '../../utils/Logger';
 
 const { ccclass, property } = _decorator;
 
@@ -34,26 +36,15 @@ export class PopupResult extends Popup {
     protected onAfterShow(): void {
         this.titleLabel.setText(i18n.t("result.title"));
 
-        const { score, time } = GameManager.instance.getGameStats();
+        const { score, playTime } = GameManager.instance.getGameStats();
         this.scoreLabel.setValue(0);
         this.scoreLabel.to(score);
-        this.timeLabel.string = `${this.formatTime(time)}`;
+        this.timeLabel.string = `${this.formatTime(playTime)}`;
 
-        // try {
-        //     const res = await NetworkManager.instance.saveScore({
-        //         score: finalScore,
-        //         time: timeUsedSeconds,
-        //         topicId,
-        //     });
-        //     isNewBestScore = res.newBestScore;
-        //     currentBest = res.currentBest;
-        //     Logger.info('[GameManager]', 'saveScore success', res);
-        // } catch (error) {
-        //     Logger.warn('[GameManager]', 'saveScore failed', error);
-        // }
+        NetworkManager.instance.httpPost("/api/flipCard/saveScore", GameManager.instance.getGameStats());
     }
 
-    onTapExit(){
+    onTapExit() {
         director.loadScene("Menu");
     }
 

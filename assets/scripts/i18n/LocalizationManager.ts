@@ -26,7 +26,7 @@ export class LocalizationManager extends EventTarget {
         const text = this._resolve(key);
         if (!text) {
             console.warn(`[i18n] Missing key: "${key}"`);
-            return key;
+            return ". . .";
         }
 
         return text.replace(/\{(\d+)\}/g, (_, i) => String(args[+i] ?? ''));
