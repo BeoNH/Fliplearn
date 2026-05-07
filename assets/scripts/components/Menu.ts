@@ -34,14 +34,14 @@ export class Menu extends Component {
         if (NetworkManager.instance.hasAccessToken) return;
         try {
             const login = await NetworkManager.instance.httpPost("/api/auth/login", { lingoxToken: urlParam("token") });
-            if(!login?.success){
+            if (!login?.success) {
                 Dialog.show(`${login?.code ?? "-1"} : ${login?.message ?? "null"}`);
                 return;
             }
             NetworkManager.instance.setAccessToken(login?.data?.accessToken);
 
             const apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { id: 1 });
-            if(!apiGameInfo?.success){
+            if (!apiGameInfo?.success) {
                 Dialog.show(`${apiGameInfo?.code ?? "-1"} : ${apiGameInfo?.message ?? "null"}`);
                 return;
             }
@@ -69,33 +69,38 @@ export class Menu extends Component {
     private mappingLevel(data: any): ILevelConfig[] {
         const lang = i18n.currentLang;
 
-        const mappedPairs: { cardA: ICardInfo; cardB: ICardInfo }[] =
+        let mappedPairs: { cardA: ICardInfo; cardB: ICardInfo }[] =
             data.pairs.map((e, i) => ({
                 cardA: {
                     cardId: `c${i}a`,
                     pairId: `pid${i}`,
                     type: CardType.TEXT,
-                    content: e.pairAtext,
+                    content: e.pairAText,
                     image: "",
                     bonus: e.bonusPoint ?? 0,
                 },
                 cardB: {
                     cardId: `c${i}b`,
                     pairId: `pid${i}`,
-                    type: e.pairBimage ? (e.pairBtext ? CardType.DEFINITION : CardType.IMAGE) : CardType.TEXT,
-                    content: e.pairBtext?.[lang] ?? e.pairBtext?.en ?? "",
-                    image: e.pairBimage ?? "",
+                    type: e.pairBImage ? (e.pairBText && Object.keys(e.pairBText).length > 0 ? CardType.DEFINITION : CardType.IMAGE) : CardType.TEXT,
+                    content: e.pairBText?.[lang] ?? e.pairBText?.en ?? "",
+                    image: e.pairBImage ?? "",
                     bonus: e.bonusPoint ?? 0,
                 }
             }));
+        mappedPairs = this.shuffle(mappedPairs);
 
         const levels = data.topic.options.levels;
         const hasTimeLimit = data.topic.options.durationEnable;
+        let offset = 0;
 
         return levels
-            .filter(lv => lv.pairsLength <= mappedPairs.length)
             .map((lv, index) => {
-                const pairsForLevel = this.shuffle(mappedPairs).slice(0, lv.pairsLength);
+                const pairsForLevel = mappedPairs.slice(offset, offset + lv.pairsLength);
+                offset += lv.pairsLength;
+
+                // if (pairsForLevel.length < lv.pairsLength) return null;
+                if (pairsForLevel.length === 0) return null;
 
                 const totalCards = pairsForLevel.length * 2;
                 const cols = Math.max(1, Math.floor(Math.sqrt(totalCards * 0.8)));
@@ -109,7 +114,8 @@ export class Menu extends Component {
                     cols,
                     pairs: pairsForLevel
                 };
-            });
+            })
+            .filter(Boolean) as ILevelConfig[];
     }
 
     private async preloadLevelAssets() {
@@ -159,6 +165,7 @@ export class Menu extends Component {
             }
 
             const levelConfig = this.mappingLevel(res.data);
+            console.log(levelConfig)
             if (!levelConfig || levelConfig.length === 0) {
                 throw new Error("No valid levelConfig");
             }

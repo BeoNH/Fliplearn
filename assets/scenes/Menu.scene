@@ -650,7 +650,7 @@
     },
     "_string": "Lật thẻ từ vựng\nTrong game này, bạn sẽ lật các thẻ để tìm cặp từ vựng phù hợp. Một số thẻ có thể chứa từ vựng nâng cao từ những chủ đề bạn chưa học. Bạn có thể thử sức ngay hoặc học trước khi chơi.",
     "_horizontalAlign": 1,
-    "_verticalAlign": 0,
+    "_verticalAlign": 1,
     "_actualFontSize": 31,
     "_fontSize": 30,
     "_fontFamily": "Arial",
