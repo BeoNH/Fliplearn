@@ -4,6 +4,7 @@ import Popup from '../../common/Popup';
 import { NetworkManager } from '../../managers/NetworkManager';
 import BroadcastReceiver from '../../common/BroadcastReceiver';
 import { ON_GAME_START } from '../../common/GameEvents';
+import { Dialog } from './PopupDialog';
 
 const { ccclass, property } = _decorator;
 
@@ -43,6 +44,9 @@ export class PopupBXH extends Popup {
 
     protected async onBeforeShow() {
         this.board = await NetworkManager.instance.httpPost("/api/flipCard/leaderboard", { id: 1 });
+        if (!this.board?.success) {
+            Dialog.show(`${this.board?.code ?? "-1"} : ${this.board?.message ?? "null"}`);
+        }
     }
 
     // Khởi tạo bảng

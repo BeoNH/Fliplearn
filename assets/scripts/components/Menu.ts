@@ -9,6 +9,7 @@ import { Logger } from '../utils/Logger';
 import { CardType, ICardInfo, ILevelConfig } from '../common/GameTypes';
 import BroadcastReceiver from '../common/BroadcastReceiver';
 import { ON_GAME_START } from '../common/GameEvents';
+import { Dialog } from './Popup/PopupDialog';
 const { ccclass, property } = _decorator;
 
 @ccclass('Menu')
@@ -33,9 +34,17 @@ export class Menu extends Component {
         if (NetworkManager.instance.hasAccessToken) return;
         try {
             const login = await NetworkManager.instance.httpPost("/api/auth/login", { lingoxToken: urlParam("token") });
+            if(!login?.success){
+                Dialog.show(`${login?.code ?? "-1"} : ${login?.message ?? "null"}`);
+                return;
+            }
             NetworkManager.instance.setAccessToken(login?.data?.accessToken);
 
             const apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { id: 1 });
+            if(!apiGameInfo?.success){
+                Dialog.show(`${apiGameInfo?.code ?? "-1"} : ${apiGameInfo?.message ?? "null"}`);
+                return;
+            }
             const data = apiGameInfo.data ?? {};
             const lang = i18n.currentLang;
 
@@ -144,7 +153,8 @@ export class Menu extends Component {
             this.loadingIcon.active = true;
 
             const res = await NetworkManager.instance.httpPost("/api/flipCard/play", { id: 1 });
-            if (!res || !res.data) {
+            if (!res || !res.data || !res?.success) {
+                Dialog.show(`${res?.code ?? "-1"} : ${res?.message ?? "null"}`);
                 throw new Error("play API: invalid response");
             }
 

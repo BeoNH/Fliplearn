@@ -8,6 +8,7 @@ import { LayerText } from '../LayerText';
 import { i18n } from '../../i18n/LocalizationManager';
 import { NetworkManager } from '../../managers/NetworkManager';
 import { Logger } from '../../utils/Logger';
+import { Dialog } from './PopupDialog';
 
 const { ccclass, property } = _decorator;
 
@@ -41,7 +42,13 @@ export class PopupResult extends Popup {
         this.scoreLabel.to(score);
         this.timeLabel.string = `${this.formatTime(playTime)}`;
 
-        NetworkManager.instance.httpPost("/api/flipCard/saveScore", GameManager.instance.getGameStats());
+        NetworkManager.instance.httpPost("/api/flipCard/saveScore", GameManager.instance.getGameStats())
+            .then(saveScore => {
+                if (!saveScore?.success) {
+                    Dialog.show(`${saveScore?.code ?? "-1"} : ${saveScore?.message ?? "null"}`);
+                }
+
+            })
     }
 
     onTapExit() {
