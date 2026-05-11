@@ -90,8 +90,8 @@ export class Menu extends Component {
             }));
         mappedPairs = this.shuffle(mappedPairs);
 
-        const levels = data.topic.options.levels;
-        const hasTimeLimit = data.topic.options.durationEnable;
+        const levels = data.topic.levels;
+        const hasTimeLimit = data.topic.durationEnable;
         let offset = 0;
 
         return levels
