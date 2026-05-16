@@ -16,7 +16,7 @@
         "exit": "Exit Game"
     },
     "donelevel": {
-        "title": "VICTORY",
+        "title": "COMPLETED",
         "content": "Great job! You completed the level very well. Let's move to the next level!",
         "score": "Score:",
         "continue": "Continue",

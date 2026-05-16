@@ -59,11 +59,12 @@ export class PopupBXH extends Popup {
         this.stateTop[1].active = isEmpty;
         if (isEmpty) return;
 
+        //Top3
         for (let i = 0; i < 3; i++) {
             const e = this.layoutTOP3.children[i];
             if (listBXH[i]) {
                 e.active = true;
-                e.getChildByPath("txtName").getComponent(Label).string = this.limitName(listBXH[i].nickname);
+                e.getChildByPath("txtName").getComponent(Label).string = this.limitName(listBXH[i].nickname, 8);
                 e.getChildByPath("txtScore").getComponent(Label).string = listBXH[i].score;
             }
         }
@@ -127,8 +128,7 @@ export class PopupBXH extends Popup {
     }
 
     // Giới hạn text không quá dài
-    private limitName(name: string): string {
-        const maxLength = 12;
+    private limitName(name: string, maxLength: number = 12): string {
         if (name.length > maxLength) {
             return name.substring(0, maxLength) + ' . . .';
         }

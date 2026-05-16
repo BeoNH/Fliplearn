@@ -103,8 +103,8 @@ export class Menu extends Component {
                 if (pairsForLevel.length === 0) return null;
 
                 const totalCards = pairsForLevel.length * 2;
-                const cols = Math.max(1, Math.floor(Math.sqrt(totalCards * 0.8)));
-                const rows = Math.ceil(totalCards / cols);
+                const rows = Math.ceil(Math.sqrt(totalCards));
+                const cols = Math.ceil(totalCards / rows);
 
                 return {
                     levelId: index + 1,

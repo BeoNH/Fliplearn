@@ -57,6 +57,8 @@ export class GameHUD extends Component {
         const { level } = evt;
         this.titleLabel.setText(GameManager.instance.GameInfo.title);
         this.levelLabel.string = `Level ${level.levelId}`;
+        const levelActive = GameManager.instance.LevelConfig.length > 1;
+        this.levelLabel.node.active = levelActive;
         this.timerNode.active = level.hasTimeLimit;
         this.onMatched();
     }
