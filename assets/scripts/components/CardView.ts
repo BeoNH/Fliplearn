@@ -1,4 +1,4 @@
-import { _decorator, Button, Component, Label, Node, Sprite, tween, Tween, UIOpacity, UISkew, v2, Vec3 } from 'cc';
+import { _decorator, AudioSource, Button, Component, Label, Node, Sprite, tween, Tween, UIOpacity, UISkew, v2, Vec3 } from 'cc';
 import { CardState, CardType, ICardInfo } from '../common/GameTypes';
 import BroadcastReceiver from '../common/BroadcastReceiver';
 import { Logger } from '../utils/Logger';
@@ -36,6 +36,9 @@ export class CardView extends Component {
     @property({ type: Sprite, tooltip: 'Ảnh thẻ' })
     private image: Sprite = null!;
 
+    @property({ type: AudioSource, tooltip: 'Âm thanh' })
+    private sound: AudioSource = null!;
+
     @property({ type: Label, tooltip: 'Tên thẻ' })
     private content: Label = null!;
 
@@ -70,6 +73,7 @@ export class CardView extends Component {
     private setCardData() {
         if (!this.cardInfo) return;
         this.image.node.active = false;
+        this.sound.node.active = false;
         this.content.node.active = false;
 
         switch (this.cardInfo.type) {
@@ -80,16 +84,47 @@ export class CardView extends Component {
                         this.image.node.active = true;
                     })
                 break;
+
+            case CardType.AUDIO:
+                AssetLoader.loadAudio(this.cardInfo.sound)
+                    .then(sf => {
+                        this.sound.clip = sf;
+                        this.sound.node.active = true;
+                        this.sound.node.off(Node.EventType.TOUCH_END);
+                        this.sound.node.on(Node.EventType.TOUCH_END, () => {
+                            this.sound.stop();
+                            this.sound.play();
+                        }, this);
+                    })
+                break;
+
             case CardType.TEXT:
                 this.content.string = this.cardInfo.content;
                 this.content.node.active = true;
                 break;
+
             case CardType.DEFINITION:
-                AssetLoader.loadSpriteFrame(this.cardInfo.image)
-                    .then(sf => {
-                        this.image.spriteFrame = sf;
-                        this.image.node.active = true;
-                    })
+                if (this.cardInfo.image) {
+                    AssetLoader.loadSpriteFrame(this.cardInfo.image)
+                        .then(sf => {
+                            this.image.spriteFrame = sf;
+                            this.image.node.active = true;
+                        })
+                }
+
+                if (this.cardInfo.sound) {
+                    AssetLoader.loadAudio(this.cardInfo.sound)
+                        .then(sf => {
+                            this.sound.clip = sf;
+                            this.sound.node.active = true;
+                            this.sound.node.off(Node.EventType.TOUCH_END);
+                            this.sound.node.on(Node.EventType.TOUCH_END, () => {
+                                this.sound.stop();
+                                this.sound.play();
+                            }, this);
+                        })
+                }
+
                 this.content.node.active = true;
                 this.content.string = this.cardInfo.content;
                 break;
@@ -110,15 +145,17 @@ export class CardView extends Component {
     private applyState(state: CardState): void {
 
         this.state = state;
-        this.flipBtn.interactable = state === CardState.FACE_DOWN;
+        this.flipBtn.node.active = state === CardState.FACE_DOWN;
         this.borderCorrect.active = false;
         this.borderWrong.active = false;
 
         switch (state) {
             case CardState.FACE_UP:
+                this.sound.play();
                 this.flip(true);
                 break;
             case CardState.FACE_DOWN:
+                this.sound.stop();
                 this.flip(false);
                 break;
             case CardState.MATCHED:

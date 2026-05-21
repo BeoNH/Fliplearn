@@ -40,7 +40,7 @@ export class Menu extends Component {
             }
             NetworkManager.instance.setAccessToken(login?.data?.accessToken);
 
-            const apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { id: 1 });
+            const apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { id: urlParam("gid") });
             if (!apiGameInfo?.success) {
                 Dialog.show(`${apiGameInfo?.code ?? "-1"} : ${apiGameInfo?.message ?? "null"}`);
                 return;
@@ -70,24 +70,39 @@ export class Menu extends Component {
         const lang = i18n.currentLang;
 
         let mappedPairs: { cardA: ICardInfo; cardB: ICardInfo }[] =
-            data.pairs.map((e, i) => ({
-                cardA: {
-                    cardId: `c${i}a`,
-                    pairId: `pid${i}`,
-                    type: CardType.TEXT,
-                    content: e.pairAText,
-                    image: "",
-                    bonus: e.bonusPoint ?? 0,
-                },
-                cardB: {
-                    cardId: `c${i}b`,
-                    pairId: `pid${i}`,
-                    type: e.pairBImage ? (e.pairBText && Object.keys(e.pairBText).length > 0 ? CardType.DEFINITION : CardType.IMAGE) : CardType.TEXT,
-                    content: e.pairBText?.[lang] ?? e.pairBText?.en ?? "",
-                    image: e.pairBImage ?? "",
-                    bonus: e.bonusPoint ?? 0,
+            data.pairs.map((e, i) => {
+                const hasBText = !!(e.pairBText && Object.keys(e.pairBText).length > 0);
+                let typeB = CardType.TEXT;
+
+                if (hasBText && e.typeBFile) {
+                    typeB = CardType.DEFINITION;
                 }
-            }));
+                else if (e.typeBFile === "image") {
+                    typeB = CardType.IMAGE;
+                }
+                else if (e.typeBFile === "audio") {
+                    typeB = CardType.AUDIO;
+                }
+
+                return {
+                    cardA: {
+                        cardId: `c${i}a`,
+                        pairId: `pid${i}`,
+                        type: CardType.TEXT,
+                        content: e.pairAText,
+                        bonus: e.bonusPoint ?? 0,
+                    },
+                    cardB: {
+                        cardId: `c${i}b`,
+                        pairId: `pid${i}`,
+                        type: typeB,
+                        content: e.pairBText?.[lang] ?? e.pairBText?.en ?? "",
+                        image: e.typeBFile === "image" ? (e.pairBFile ?? "") : "",
+                        sound: e.typeBFile === "audio" ? (e.pairBFile ?? "") : "",
+                        bonus: e.bonusPoint ?? 0,
+                    }
+                };
+            });
         mappedPairs = this.shuffle(mappedPairs);
 
         const levels = data.topic.levels;
@@ -118,14 +133,17 @@ export class Menu extends Component {
             .filter(Boolean) as ILevelConfig[];
     }
 
-    private async preloadLevelAssets() {
+    private async preloadLevelAssets(levelConfig: ILevelConfig[]) {
         const tasks: Promise<any>[] = [];
 
-        for (const level of apiPlay) {
+        for (const level of levelConfig) {
             for (const pair of level.pairs) {
                 [pair.cardA, pair.cardB].forEach(card => {
                     if (card.image) {
                         tasks.push(AssetLoader.loadSpriteFrame(card.image));
+                    }
+                    if (card.sound) {
+                        tasks.push(AssetLoader.loadAudio(card.sound));
                     }
                 });
             }
@@ -158,7 +176,7 @@ export class Menu extends Component {
             this.buttonPlay.active = false;
             this.loadingIcon.active = true;
 
-            const res = await NetworkManager.instance.httpPost("/api/flipCard/play", { id: 1 });
+            const res = await NetworkManager.instance.httpPost("/api/flipCard/play", { id: urlParam("gid") });
             if (!res || !res.data || !res?.success) {
                 Dialog.show(`${res?.code ?? "-1"} : ${res?.message ?? "null"}`);
                 throw new Error("play API: invalid response");
@@ -173,7 +191,7 @@ export class Menu extends Component {
             GameManager.instance.LevelConfig = levelConfig;
             GameManager.instance.ApiSession = res.data.gameSession;
 
-            await this.preloadLevelAssets();
+            await this.preloadLevelAssets(levelConfig);
 
             await new Promise<void>((resolve, reject) =>
                 director.preloadScene("Game", null, err => err ? reject(err) : resolve())

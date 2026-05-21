@@ -15,6 +15,7 @@ export enum CardState {
 export enum CardType {
     TEXT = 'TEXT',
     IMAGE = 'IMAGE',
+    AUDIO = 'AUDIO',
     DEFINITION = 'DEFINITION',
 }
 
@@ -31,6 +32,7 @@ export interface ICardInfo {
     type: CardType;
     content: string;
     image: string;
+    sound: string;
     bonus: number;
 }
 

@@ -1,7 +1,7 @@
 import { _decorator, Component, instantiate, Label, Node, Prefab, v3 } from 'cc';
 import AssetLoader from '../../services/AssetLoader';
 import Popup from '../../common/Popup';
-import { NetworkManager } from '../../managers/NetworkManager';
+import { NetworkManager, urlParam } from '../../managers/NetworkManager';
 import BroadcastReceiver from '../../common/BroadcastReceiver';
 import { ON_GAME_START } from '../../common/GameEvents';
 import { Dialog } from './PopupDialog';
@@ -43,7 +43,7 @@ export class PopupBXH extends Popup {
     }
 
     protected async onBeforeShow() {
-        this.board = await NetworkManager.instance.httpPost("/api/flipCard/leaderboard", { id: 1 });
+        this.board = await NetworkManager.instance.httpPost("/api/flipCard/leaderboard", { id: urlParam("gid") });
         if (!this.board?.success) {
             Dialog.show(`${this.board?.code ?? "-1"} : ${this.board?.message ?? "null"}`);
         }
