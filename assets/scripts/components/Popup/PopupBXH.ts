@@ -62,6 +62,7 @@ export class PopupBXH extends Popup {
         //Top3
         for (let i = 0; i < 3; i++) {
             const e = this.layoutTOP3.children[i];
+            e.active = false;
             if (listBXH[i]) {
                 e.active = true;
                 e.getChildByPath("txtName").getComponent(Label).string = this.limitName(listBXH[i].nickname, 8);

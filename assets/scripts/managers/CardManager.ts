@@ -99,10 +99,14 @@ export class CardManager {
         this.setState(cardBId, CardState.LOCKED);
 
         this.mismatchTimerId = setTimeout(() => {
-            this.mismatchTimerId = null;
+            // this.mismatchTimerId = null;
             this.setState(cardAId, CardState.FACE_DOWN);
             this.setState(cardBId, CardState.FACE_DOWN);
             this.flipped = [];
+            
+            setTimeout(() => {
+                this.mismatchTimerId = null;
+            }, 500);
         }, 1.3 * 1000);
     }
 

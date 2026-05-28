@@ -65,7 +65,7 @@ const DEFAULT_CONFIG: Required<NetworkConfig> = {
     reconnectBaseDelay: 1000,
     maxReconnectDelay: 30_000,
     pingIntervalMs: 3000,
-    httpBaseUrl: `${urlParam('url_api') ?? "https://api-dev.lingox.co"}`,
+    httpBaseUrl: `${urlParam('url_api') ?? "https://api-dev.lingox.co/minigame"}`,
     accessToken: "",
 };
 
