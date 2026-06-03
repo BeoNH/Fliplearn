@@ -1,4 +1,4 @@
-import { _decorator, AudioSource, Button, Component, Label, Node, Sprite, tween, Tween, UIOpacity, UISkew, v2, Vec3 } from 'cc';
+import { _decorator, Animation, AudioSource, Button, Component, Label, Node, Sprite, tween, Tween, UIOpacity, UISkew, v2, Vec3 } from 'cc';
 import { CardState, CardType, ICardInfo } from '../common/GameTypes';
 import BroadcastReceiver from '../common/BroadcastReceiver';
 import { Logger } from '../utils/Logger';
@@ -17,6 +17,9 @@ export class CardView extends Component {
 
     @property({ type: Node, tooltip: 'Mặt trước thẻ' })
     private frontFace: Node = null!;
+
+    @property({ type: Node, tooltip: 'Mặt trước được chọn' })
+    private selectFace: Node = null!;
 
     @property({ type: Node, tooltip: 'Viền khi đúng' })
     private borderCorrect: Node = null!;
@@ -42,12 +45,16 @@ export class CardView extends Component {
     @property({ type: Label, tooltip: 'Tên thẻ' })
     private content: Label = null!;
 
+    @property({ type: Node, tooltip: 'Điểm cộng khi đoán đúng' })
+    private bonusScore: Node = null!;
+
     // ─── Internal state ───────────────────────────────────────────────────────
 
     private cardInfo: ICardInfo | null = null;
     private state: CardState = CardState.FACE_DOWN;
     private scaleClone: Vec3 = Vec3.ONE;
     private uiSkew: UISkew = null!;
+    private isShowBonus: boolean = false;
 
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
@@ -72,6 +79,7 @@ export class CardView extends Component {
 
     private setCardData() {
         if (!this.cardInfo) return;
+        this.bonusScore.getComponent(Label).string = `+${this.cardInfo.bonus}`;
         this.image.node.active = false;
         this.sound.node.active = false;
         this.content.node.active = false;
@@ -137,8 +145,9 @@ export class CardView extends Component {
         CardManager.instance.flipCard(this.cardInfo.cardId);
     }
 
-    private onCardStateChanged(data: { cardId: string; state: CardState }) {
+    private onCardStateChanged(data: { cardId: string; state: CardState, showBonus: boolean }) {
         if (!this.cardInfo || data.cardId !== this.cardInfo.cardId) return;
+        this.isShowBonus = data.showBonus;
         this.applyState(data.state);
     }
 
@@ -148,10 +157,12 @@ export class CardView extends Component {
         this.flipBtn.node.active = state === CardState.FACE_DOWN;
         this.borderCorrect.active = false;
         this.borderWrong.active = false;
+        this.selectFace.active = false;
 
         switch (state) {
             case CardState.FACE_UP:
                 this.sound.play();
+                this.selectFace.active = true;
                 this.flip(true);
                 break;
             case CardState.FACE_DOWN:
@@ -256,6 +267,15 @@ export class CardView extends Component {
 
         // Border flash
         this._flashBorder(this.borderCorrect);
+
+        if (!this.isShowBonus) return;
+        // anim cộng điểm
+        this.bonusScore.active = true;
+        const anim = this.bonusScore.getComponent(Animation);
+        anim.once(Animation.EventType.FINISHED, () => {
+            this.bonusScore.active = false;
+        });
+        anim.play();
     }
 
     /**

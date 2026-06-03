@@ -60,9 +60,9 @@ export class CardManager {
         }
     }
 
-    private setState(cardId: string, state: CardState): void {
+    private setState(cardId: string, state: CardState, showBonus: boolean = false): void {
         this.stateByCardId.set(cardId, state);
-        BroadcastReceiver.send(ON_CARD_STATE_CHANGED, { cardId, state });
+        BroadcastReceiver.send(ON_CARD_STATE_CHANGED, { cardId, state, showBonus });
     }
 
     private checkMatch(cardAId: string, cardBId: string): void {
@@ -83,13 +83,13 @@ export class CardManager {
 
     private handleMatch(cardAId: string, cardBId: string, bonus?: number): void {
         this.setState(cardAId, CardState.MATCHED);
-        this.setState(cardBId, CardState.MATCHED);
+        this.setState(cardBId, CardState.MATCHED, true);
         this.flipped = [];
 
         ScoreManager.instance.recordMatchedPair(bonus ?? 0);
         BroadcastReceiver.send(ON_CARD_MATCHED);
         GameManager.instance.checkLevelComplete();
-        
+
         const payload = { cardAId, cardBId, bonus };
         Logger.info('[CardManager]', 'matched', payload);
     }
@@ -103,7 +103,7 @@ export class CardManager {
             this.setState(cardAId, CardState.FACE_DOWN);
             this.setState(cardBId, CardState.FACE_DOWN);
             this.flipped = [];
-            
+
             setTimeout(() => {
                 this.mismatchTimerId = null;
             }, 500);
