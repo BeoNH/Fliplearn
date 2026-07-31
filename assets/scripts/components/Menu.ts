@@ -40,19 +40,22 @@ export class Menu extends Component {
             }
             NetworkManager.instance.setAccessToken(login?.data?.accessToken);
 
-            const apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { id: urlParam("gid") });
-            if (!apiGameInfo?.success) {
-                Dialog.show(`${apiGameInfo?.code ?? "-1"} : ${apiGameInfo?.message ?? "null"}`);
-                return;
+            let apiGameInfo: any = null;
+            if (urlParam("mode") === "topic") {
+                apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { id: urlParam("gid") });
+                if (!apiGameInfo?.success) {
+                    Dialog.show(`${apiGameInfo?.code ?? "-1"} : ${apiGameInfo?.message ?? "null"}`);
+                    return;
+                }
             }
-            const data = apiGameInfo.data ?? {};
+            const data = apiGameInfo?.data ?? {};
             const lang = i18n.currentLang;
 
             GameManager.instance.GameInfo = {
                 gameId: data.id ?? -1,
                 title: data.name ?? "",
-                description: data.introduction?.[lang] ?? "",
-                introduction: data.introduction?.[lang] ?? ""
+                description: data.introduction?.[lang] ?? i18n.t("menu.description") ?? "",
+                introduction: data.introduction?.[lang] ?? i18n.t("introduc.description") ?? ""
             };
             this.labelDesc.string = GameManager.instance.GameInfo.description;
 
@@ -176,7 +179,10 @@ export class Menu extends Component {
             this.buttonPlay.active = false;
             this.loadingIcon.active = true;
 
-            const res = await NetworkManager.instance.httpPost("/api/flipCard/play", { id: urlParam("gid") });
+            const res = await NetworkManager.instance.httpPost("/api/flipCard/play", {
+                id: urlParam("gid"),
+                mode: urlParam("mode") || "topic",
+            });
             if (!res || !res.data || !res?.success) {
                 Dialog.show(`${res?.code ?? "-1"} : ${res?.message ?? "null"}`);
                 throw new Error("play API: invalid response");

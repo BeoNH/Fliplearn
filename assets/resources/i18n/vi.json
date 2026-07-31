@@ -1,7 +1,8 @@
 {
     "common": {},
     "menu": {
-        "btnPlay": "Chơi"
+        "btnPlay": "Chơi",
+        "description":"Lật thẻ từ vựng\nTrong game này, bạn sẽ lật các thẻ để tìm cặp từ vựng phù hợp. Một số thẻ có thể chứa từ vựng nâng cao từ những chủ đề bạn chưa học. Bạn có thể thử sức ngay hoặc học trước khi chơi."
     },
     "gamehud": {
         "matched": "{0} Cặp",
@@ -9,7 +10,8 @@
         "level": "Cấp độ {0}"
     },
     "introduc": {
-        "title": "Giới thiệu"
+        "title": "Giới thiệu",
+        "description":"Lật thẻ từ vựng\nTrong game này, bạn sẽ lật các thẻ để tìm cặp từ vựng phù hợp. Một số thẻ có thể chứa từ vựng nâng cao từ những chủ đề bạn chưa học. Bạn có thể thử sức ngay hoặc học trước khi chơi."
     },
     "exitgame": {
         "title": "Xác nhận thoát!",
