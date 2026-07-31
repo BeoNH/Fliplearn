@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Label, Node, Prefab, v3 } from 'cc';
+import { _decorator, Component, instantiate, Label, Node, Prefab, Sprite, v3 } from 'cc';
 import AssetLoader from '../../services/AssetLoader';
 import Popup from '../../common/Popup';
 import { NetworkManager, urlParam } from '../../managers/NetworkManager';
@@ -67,6 +67,10 @@ export class PopupBXH extends Popup {
                 e.active = true;
                 e.getChildByPath("txtName").getComponent(Label).string = this.limitName(listBXH[i].nickname, 8);
                 e.getChildByPath("txtScore").getComponent(Label).string = listBXH[i].score;
+                if(listBXH[i].avatar) {
+                    AssetLoader.loadSpriteFrame(listBXH[i].avatar)
+                        .then(sf => { e.getChildByPath("Mask/avt1").getComponent(Sprite).spriteFrame = sf; })
+                }
             }
         }
 
@@ -92,6 +96,10 @@ export class PopupBXH extends Popup {
             item.getChildByPath("txtName").getComponent(Label).string = this.limitName(listBXH[rankIndex].nickname);
             item.getChildByPath("txtTime").getComponent(Label).string = this.formatTime(listBXH[rankIndex].playTime);
             item.getChildByPath("txtScore").getComponent(Label).string = listBXH[rankIndex].score;
+            if(listBXH[rankIndex].avatar) {
+                AssetLoader.loadSpriteFrame(listBXH[rankIndex].avatar)
+                    .then(sf => { item.getChildByPath("Mask/avt1").getComponent(Sprite).spriteFrame = sf; })
+            }
         }
 
         // Ẩn đi những item dư thừa
@@ -114,6 +122,10 @@ export class PopupBXH extends Popup {
         const hasRank = (yourInfo?.rank ?? 0) > 0;
 
         if (nameLb) nameLb.string = this.limitName(yourInfo?.nickname ?? "Guest");
+        if(yourInfo?.avatar) {
+            AssetLoader.loadSpriteFrame(yourInfo?.avatar)
+                .then(sf => { root.getChildByPath("Mask/avt1").getComponent(Sprite).spriteFrame = sf; })
+        }
 
         if (noneRank) noneRank.active = !hasRank;
         if (timeNode) timeNode.active = hasRank;
