@@ -4,7 +4,9 @@
         "btnPlay": "Chơi"
     },
     "gamehud": {
-        "matched": "{0} Cặp"
+        "matched": "{0} Cặp",
+        "title": "FlipLearn",
+        "level": "Cấp độ {0}"
     },
     "introduc": {
         "title": "Giới thiệu"
@@ -30,6 +32,7 @@
         "BXH": "BXH"
     },
     "leaderboard": {
+        "title": "Bảng xếp hạng",
         "btnPlay": "Chơi ngay",
         "nonRank": "Bạn chưa có tên trên bảnh xếp hạng. Hãy chơi ngay để ghi điểm và xuất hiện trong Top!",
         "emptyTxt": "Chưa có người chơi nào!",

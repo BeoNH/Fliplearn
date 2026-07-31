@@ -4,7 +4,9 @@
         "btnPlay": "시작"
     },
     "gamehud": {
-        "matched": "{0} 쌍"
+        "matched": "{0} 쌍",
+        "title": "FlipLearn",
+        "level": "레벨 {0}"
     },
     "introduc": {
         "title": "소개"
@@ -30,6 +32,7 @@
         "BXH": "랭킹"
     },
     "leaderboard": {
+        "title": "랭킹",
         "btnPlay": "지금 플레이",
         "nonRank": "아직 랭킹에 없습니다. 지금 플레이하여 점수를 얻고 Top에 도전하세요!",
         "emptyTxt": "아직 플레이어가 없습니다!",

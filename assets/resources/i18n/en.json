@@ -4,7 +4,9 @@
         "btnPlay": "Start"
     },
     "gamehud": {
-        "matched": "{0} Pairs"
+        "matched": "{0} Pairs",
+        "title": "FlipLearn",
+        "level": "Level {0}"
     },
     "introduc": {
         "title": "Introduction"
@@ -30,6 +32,7 @@
         "BXH": "Leaderboard"
     },
     "leaderboard": {
+        "title": "Leaderboard",
         "btnPlay": "Play Now",
         "nonRank": "You are not on the leaderboard yet. Play now to score and appear in the Top!",
         "emptyTxt": "No players yet!",

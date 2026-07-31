@@ -9,6 +9,7 @@ import { ILevelInitEvent } from '../common/GameTypes';
 import { PopupIntroduc } from './Popup/PopupIntroduc';
 import { PopupExit } from './Popup/PopupExit';
 import { LocalizedLabel } from '../i18n/LocalizedLabel';
+import { i18n } from '../i18n/LocalizationManager';
 
 const { ccclass, property } = _decorator;
 
@@ -55,8 +56,9 @@ export class GameHUD extends Component {
 
     private render(evt: ILevelInitEvent): void {
         const { level } = evt;
-        this.titleLabel.setText(GameManager.instance.GameInfo.title);
-        this.levelLabel.string = `Level ${level.levelId}`;
+        // this.titleLabel.setText(GameManager.instance.GameInfo.title);
+        this.titleLabel.setText(i18n.t('gamehud.title') as string);
+        this.levelLabel.string = i18n.t('gamehud.level', level.levelId) as string;
         const levelActive = GameManager.instance.LevelConfig.length > 1;
         this.levelLabel.node.active = levelActive;
         this.timerNode.active = level.hasTimeLimit;
