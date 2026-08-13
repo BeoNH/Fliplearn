@@ -41,12 +41,13 @@ export class Menu extends Component {
             NetworkManager.instance.setAccessToken(login?.data?.accessToken);
 
             let apiGameInfo: any = null;
-            if (urlParam("mode") === "topic") {
-                apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { id: urlParam("gid") });
-                if (!apiGameInfo?.success) {
-                    Dialog.show(`${apiGameInfo?.code ?? "-1"} : ${apiGameInfo?.message ?? "null"}`);
-                    return;
-                }
+            apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { 
+                id: urlParam("gid"),
+                mode: urlParam("mode") || "topic",
+            });
+            if (!apiGameInfo?.success) {
+                Dialog.show(`${apiGameInfo?.code ?? "-1"} : ${apiGameInfo?.message ?? "null"}`);
+                return;
             }
             const data = apiGameInfo?.data ?? {};
             const lang = i18n.currentLang;

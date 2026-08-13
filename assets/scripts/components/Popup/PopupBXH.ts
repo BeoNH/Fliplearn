@@ -43,7 +43,10 @@ export class PopupBXH extends Popup {
     }
 
     protected async onBeforeShow() {
-        this.board = await NetworkManager.instance.httpPost("/api/flipCard/leaderboard", { id: urlParam("gid") });
+        this.board = await NetworkManager.instance.httpPost("/api/flipCard/leaderboard", { 
+            id: urlParam("gid"), 
+            mode: urlParam("mode") || "topic" 
+        });
         if (!this.board?.success) {
             Dialog.show(`${this.board?.code ?? "-1"} : ${this.board?.message ?? "null"}`);
         }
