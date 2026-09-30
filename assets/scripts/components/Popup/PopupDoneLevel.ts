@@ -24,8 +24,8 @@ export class PopupDoneLevel extends Popup {
         });
     }
 
-    show() {
-        super.show();
+    async show() {
+        await super.show();
     }
 
     @property({ type: NumberScrolling, tooltip: 'Hiển thị điểm' })

@@ -14,8 +14,8 @@ export class PopupExit extends Popup {
         node.getComponent(PopupExit).show();
     }
 
-    show() {
-        super.show();
+    async show() {
+        await super.show();
         TimerManager.instance.stop();
     }
 

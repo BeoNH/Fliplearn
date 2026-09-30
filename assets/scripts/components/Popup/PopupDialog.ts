@@ -11,13 +11,13 @@ export class Dialog extends Popup {
         let node = instantiate(prefab);
         node.getComponent(Dialog).show(message);
     }
-    
+
     @property({ type: Label, tooltip: 'Hiển thị nội dung' })
     private viewLabel: Label = null!;
 
-    show(message?: string) {
-        super.show();
+    async show(message?: string) {
         if (message) this.viewLabel.string = message;
+        await super.show();
     }
 }
 

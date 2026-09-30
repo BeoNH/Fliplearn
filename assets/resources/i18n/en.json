@@ -1,5 +1,7 @@
 {
-    "common": {},
+    "common": {
+        "somethingwentwrong": "Something went wrong"
+    },
     "menu": {
         "btnPlay": "Start",
         "description":"Vocabulary Card Flip\nIn this game, you'll flip cards to find matching vocabulary pairs. Some cards may contain advanced vocabulary from topics you haven't learned yet. You can try it now or learn the vocabulary before playing."

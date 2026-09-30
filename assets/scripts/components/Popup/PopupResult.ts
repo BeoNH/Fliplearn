@@ -1,4 +1,4 @@
-import { _decorator, director, instantiate, Label, Prefab } from 'cc';
+import { _decorator, Button, director, instantiate, Label, Prefab } from 'cc';
 import Popup from '../../common/Popup';
 import AssetLoader from '../../services/AssetLoader';
 import { NumberScrolling } from '../../common/NumberScrolling';
@@ -21,8 +21,8 @@ export class PopupResult extends Popup {
         node.getComponent(PopupResult).show();
     }
 
-    show() {
-        super.show();
+    async show() {
+        await super.show();
     }
 
     @property({ type: LayerText, tooltip: 'Hiển thị tên kết quả' })
@@ -34,6 +34,11 @@ export class PopupResult extends Popup {
     @property({ type: Label, tooltip: 'Hiển thị thời gian chơi' })
     private timeLabel: Label = null!;
 
+    @property(Button)
+    private btnTopic: Button = null!;
+    @property(Button)
+    private btnLeaderboard: Button = null!;
+
     protected onAfterShow(): void {
         this.titleLabel.setText(i18n.t("result.title"));
 
@@ -41,6 +46,9 @@ export class PopupResult extends Popup {
         this.scoreLabel.setValue(0);
         this.scoreLabel.to(score);
         this.timeLabel.string = `${this.formatTime(playTime)}`;
+
+        this.btnTopic.node.active = false;
+        this.btnLeaderboard.node.active = false;
 
         NetworkManager.instance.httpPost("/api/flipCard/saveScore", {
             id: urlParam("gid"),
@@ -52,7 +60,13 @@ export class PopupResult extends Popup {
                     Dialog.show(`${saveScore?.code ?? "-1"} : ${saveScore?.message ?? "null"}`);
                 }
 
+                this.btnTopic.node.active = true;
+                this.btnLeaderboard.node.active = true;
             })
+            .catch(error => {
+                this.btnTopic.node.active = true;
+                this.btnLeaderboard.node.active = true;
+            });
     }
 
     onTapExit() {
@@ -61,6 +75,12 @@ export class PopupResult extends Popup {
 
     onTapBXH() {
         PopupBXH.show();
+    }
+
+    onTapTopic() {
+        director.loadScene("Menu");
+        console.log("postMessage goToLearnPath");
+        window.parent.postMessage("goToLearnPath", "*");
     }
 
     private formatTime(secondsRaw: number): string {

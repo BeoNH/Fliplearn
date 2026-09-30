@@ -1,4 +1,4 @@
-import { _decorator, Component, director, EventTouch, Label, log, Node, tween, Tween, Vec3 } from 'cc';
+import { _decorator, Asset, Component, director, EventTouch, Label, log, Node, tween, Tween, Vec3 } from 'cc';
 import { apiGameInfo, apiPlay } from '../dataDemo';
 import { GameManager } from '../managers/GameManager';
 import { PopupBXH } from './Popup/PopupBXH';
@@ -10,6 +10,7 @@ import { CardType, ICardInfo, ILevelConfig } from '../common/GameTypes';
 import BroadcastReceiver from '../common/BroadcastReceiver';
 import { ON_GAME_START } from '../common/GameEvents';
 import { Dialog } from './Popup/PopupDialog';
+import { UILabel } from '../utils/UILabel';
 const { ccclass, property } = _decorator;
 
 @ccclass('Menu')
@@ -24,12 +25,19 @@ export class Menu extends Component {
     @property({ type: Node, tooltip: 'Icon load màn' })
     loadingIcon: Node = null!;
 
+    @property([Asset])
+    preloadAssets: Asset[] = [];
+
     protected async onLoad() {
         i18n.switchLanguage(urlParam("lang") ?? "en");
 
         BroadcastReceiver.register(ON_GAME_START, this.onTapPlay.bind(this), this);
 
         this.labelDesc.string = GameManager.instance?.GameInfo?.description;
+        const uiLabel = this.labelDesc.getComponent(UILabel);
+        if (uiLabel) {
+            uiLabel.text = this.labelDesc.string;
+        }
 
         if (NetworkManager.instance.hasAccessToken) return;
         try {
@@ -41,7 +49,7 @@ export class Menu extends Component {
             NetworkManager.instance.setAccessToken(login?.data?.accessToken);
 
             let apiGameInfo: any = null;
-            apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", { 
+            apiGameInfo = await NetworkManager.instance.httpPost("/api/flipCard/getTopic", {
                 id: urlParam("gid"),
                 mode: urlParam("mode") || "topic",
             });
@@ -59,6 +67,10 @@ export class Menu extends Component {
                 introduction: data.introduction?.[lang] ?? i18n.t("introduc.description") ?? ""
             };
             this.labelDesc.string = GameManager.instance.GameInfo.description;
+            const uiLabel = this.labelDesc.getComponent(UILabel);
+            if (uiLabel) {
+                uiLabel.text = this.labelDesc.string;
+            }
 
         } catch (err) {
             Logger.error(err);
@@ -184,6 +196,12 @@ export class Menu extends Component {
                 id: urlParam("gid"),
                 mode: urlParam("mode") || "topic",
             });
+            console.log(res);
+            if (!res) {
+                console.log("Something went wrong");
+                Dialog.show(i18n.t("common.somethingwentwrong"));
+                throw new Error("play API: invalid response");
+            }
             if (!res || !res.data || !res?.success) {
                 Dialog.show(`${res?.code ?? "-1"} : ${res?.message ?? "null"}`);
                 throw new Error("play API: invalid response");

@@ -39,16 +39,18 @@ export default class Popup extends Component {
         this.resetVisualState();
     }
 
-    public show(): void {
+    public async show() {
         if (this._isVisible || this._isAnimating) return;
 
         this.attachToPopupRoot();
+        await this.onBeforeShow();
+
+        console.log("show popup", this.node.name);
 
         this.node.active = true;
         this._isVisible = true;
         this._isAnimating = true;
 
-        this.onBeforeShow();
         this.resetVisualState();
 
         if (this.bg) {
@@ -115,7 +117,7 @@ export default class Popup extends Component {
         return this._isVisible;
     }
 
-    protected onBeforeShow(): void { }
+    protected async onBeforeShow(): Promise<void> { }
     protected onAfterShow(): void { }
     protected onBeforeHide(): void { }
     protected onAfterHide(): void {

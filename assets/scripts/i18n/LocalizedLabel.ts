@@ -1,5 +1,6 @@
 import { _decorator, CCString, Component, Label, RichText } from 'cc';
 import { i18n, LocalizationManager } from './LocalizationManager';
+import { UILabel } from '../utils/UILabel';
 
 const { ccclass, property } = _decorator;
 
@@ -44,6 +45,11 @@ export class LocalizedLabel extends Component {
             this._label.string = text;
         } else {
             this._label.string = text; // RichText
+        }
+
+        const uiLabel = this.node.getComponent(UILabel);
+        if (uiLabel) {
+            uiLabel.text = text;
         }
     };
 }

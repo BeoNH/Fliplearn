@@ -5,20 +5,24 @@ import { NetworkManager, urlParam } from '../../managers/NetworkManager';
 import BroadcastReceiver from '../../common/BroadcastReceiver';
 import { ON_GAME_START } from '../../common/GameEvents';
 import { Dialog } from './PopupDialog';
+import { i18n } from '../../i18n/LocalizationManager';
 
 const { ccclass, property } = _decorator;
 
 @ccclass('PopupBXH')
 export class PopupBXH extends Popup {
     public static async show() {
-        let prefab = await AssetLoader.loadResAsync<Prefab>("prefabs/popupBXH", Prefab);
+        let prefab = await AssetLoader.loadResAsync<Prefab>("prefabs/popupBXH", Prefab).catch(e => {
+            Dialog.show(i18n.t("common.somethingwentwrong"));
+            throw e;
+        });
         if (!prefab) return;
         let node = instantiate(prefab);
         node.getComponent(PopupBXH).show();
     }
 
-    show() {
-        super.show();
+    async show() {
+        await super.show();
     }
 
     @property({ type: Node, tooltip: "Bộ top 3 người cao nhất" })
@@ -43,9 +47,9 @@ export class PopupBXH extends Popup {
     }
 
     protected async onBeforeShow() {
-        this.board = await NetworkManager.instance.httpPost("/api/flipCard/leaderboard", { 
-            id: urlParam("gid"), 
-            mode: urlParam("mode") || "topic" 
+        this.board = await NetworkManager.instance.httpPost("/api/flipCard/leaderboard", {
+            id: urlParam("gid"),
+            mode: urlParam("mode") || "topic"
         });
         if (!this.board?.success) {
             Dialog.show(`${this.board?.code ?? "-1"} : ${this.board?.message ?? "null"}`);
@@ -70,9 +74,13 @@ export class PopupBXH extends Popup {
                 e.active = true;
                 e.getChildByPath("txtName").getComponent(Label).string = this.limitName(listBXH[i].nickname, 8);
                 e.getChildByPath("txtScore").getComponent(Label).string = listBXH[i].score;
-                if(listBXH[i].avatar) {
-                    AssetLoader.loadSpriteFrame(listBXH[i].avatar)
-                        .then(sf => { e.getChildByPath("Mask/avt1").getComponent(Sprite).spriteFrame = sf; })
+                if (listBXH[i].avatar) {
+                    AssetLoader
+                        .loadSpriteFrame(listBXH[i].avatar)
+                        .then(sf => {
+                            if (!e || !e.parent || !e.isValid) return;
+                            e.getChildByPath("Mask/avt1").getComponent(Sprite).spriteFrame = sf;
+                        })
                 }
             }
         }
@@ -99,9 +107,13 @@ export class PopupBXH extends Popup {
             item.getChildByPath("txtName").getComponent(Label).string = this.limitName(listBXH[rankIndex].nickname);
             item.getChildByPath("txtTime").getComponent(Label).string = this.formatTime(listBXH[rankIndex].playTime);
             item.getChildByPath("txtScore").getComponent(Label).string = listBXH[rankIndex].score;
-            if(listBXH[rankIndex].avatar) {
-                AssetLoader.loadSpriteFrame(listBXH[rankIndex].avatar)
-                    .then(sf => { item.getChildByPath("Mask/avt1").getComponent(Sprite).spriteFrame = sf; })
+            if (listBXH[rankIndex].avatar) {
+                AssetLoader
+                    .loadSpriteFrame(listBXH[rankIndex].avatar)
+                    .then(sf => {
+                        if (!item || !item.parent || !item.isValid) return;
+                        item.getChildByPath("Mask/avt1").getComponent(Sprite).spriteFrame = sf;
+                    });
             }
         }
 
@@ -125,7 +137,7 @@ export class PopupBXH extends Popup {
         const hasRank = (yourInfo?.rank ?? 0) > 0;
 
         if (nameLb) nameLb.string = this.limitName(yourInfo?.nickname ?? "Guest");
-        if(yourInfo?.avatar) {
+        if (yourInfo?.avatar) {
             AssetLoader.loadSpriteFrame(yourInfo?.avatar)
                 .then(sf => { root.getChildByPath("Mask/avt1").getComponent(Sprite).spriteFrame = sf; })
         }
